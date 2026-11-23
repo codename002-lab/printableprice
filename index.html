@@ -276,14 +276,8 @@
           Sign In to Price List
         </button>
 
-        <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
-          <div class="flex items-center justify-between">
-            <span><b>Admin</b> (Full Edit): <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">admin</code> / <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">ecco2026</code></span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span><b>Sales</b> (View &amp; Calc): <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">sales</code> / <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">counter2026</code></span>
-          </div>
-          <p class="text-[10px] text-slate-400 pt-1">Session automatically locks when closing this tab or clicking Log Out.</p>
+        <div class="pt-2 border-t border-slate-100 text-center">
+          <p class="text-[11px] text-slate-400">Session automatically locks when closing this tab or clicking Log Out.</p>
         </div>
       </form>
     </div>
@@ -871,6 +865,35 @@
                 </button>
               </div>
             </div>
+
+            <!-- Admin Login Credentials Manager -->
+            <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase text-[#1E3A5F]">Staff &amp; Admin Login Credentials</span>
+                <button type="button" onclick="resetCredentialsToConfig()" class="text-[10px] font-bold text-slate-500 hover:text-rose-600 cursor-pointer">Reset Default</button>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-500 mb-0.5">Admin Username</label>
+                  <input type="text" id="cred-admin-user" class="w-full min-h-[38px] px-2.5 py-1 text-xs font-semibold bg-slate-50 rounded-lg border border-slate-300" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-500 mb-0.5">Admin Password</label>
+                  <input type="text" id="cred-admin-pass" class="w-full min-h-[38px] px-2.5 py-1 text-xs font-mono bg-slate-50 rounded-lg border border-slate-300" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-500 mb-0.5">Sales Username</label>
+                  <input type="text" id="cred-sales-user" class="w-full min-h-[38px] px-2.5 py-1 text-xs font-semibold bg-slate-50 rounded-lg border border-slate-300" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-500 mb-0.5">Sales Password</label>
+                  <input type="text" id="cred-sales-pass" class="w-full min-h-[38px] px-2.5 py-1 text-xs font-mono bg-slate-50 rounded-lg border border-slate-300" />
+                </div>
+              </div>
+              <button type="button" onclick="saveUpdatedCredentials()" class="w-full min-h-[38px] py-1.5 px-3 rounded-xl text-xs font-bold text-white bg-[#1E3A5F] hover:bg-[#142842] transition cursor-pointer">
+                Update Login Credentials
+              </button>
+            </div>
           </div>
         </div>
 
@@ -962,25 +985,220 @@
 
   <script>
     // =========================================================================
-    // 1. STAFF & ADMIN CREDENTIALS (SHA-256 HASHED)
-    // To generate a new password hash in your browser console, run:
-    //   ECCO_HASH("your_new_password")
-    // Default Admin: admin / ecco2026
-    // Default Sales: sales / counter2026
+    // 1. EDIT YOUR USERNAMES & PASSWORDS RIGHT HERE (WORKS ON FILE:// & HTTPS)
+    // Change the values below and save the file, OR edit them inside the app's
+    // "Supplier Header, Markup Guide & Layout" panel when logged in as Admin.
     // =========================================================================
-    const AUTH_USERS = [
-      {
-        username: 'admin',
-        role: 'admin',
-        // SHA-256 of "ecco2026"
-        passwordHash: '08253a30cd3ff6bd24eb5e805018b7e3c3c9f58f6dc464a5b2ba56bfef86a65a'
-      },
-      {
-        username: 'sales',
-        role: 'sales',
-        // SHA-256 of "counter2026"
-        passwordHash: 'a3228f1a8a4b2520e3748375fc0aaeb34cf9e036e98c08340b75b3cf94f3e08b'
+    const AUTH_CONFIG = {
+      adminUsername: 'admin',
+      adminPassword: 'ecco2026',
+      salesUsername: 'sales',
+      salesPassword: 'counter2026'
+    };
+
+    const STORAGE_KEY_CREDS = 'ecco_auth_credentials_v1';
+    const SESSION_AUTH_KEY = 'ecco_session_auth_v1';
+    let currentUser = null; // { username, role: 'admin' | 'sales' }
+
+    // Pure-JavaScript SHA-256 (works 100% offline on file:/// Desktop, localhost & HTTPS)
+    function sha256Hex(ascii) {
+      function rightRotate(value, amount) {
+        return (value >>> amount) | (value << (32 - amount));
       }
+      const mathPow = Math.pow;
+      const maxWord = mathPow(2, 32);
+      let result = '';
+      const words = [];
+      const asciiBitLength = ascii.length * 8;
+
+      const hash = [];
+      const k = [];
+      let primeCounter = 0;
+      const isComposite = {};
+      for (let candidate = 2; primeCounter < 64; candidate++) {
+        if (!isComposite[candidate]) {
+          for (let i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+          hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
+          k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+        }
+      }
+
+      ascii += '\x80';
+      while ((ascii.length % 64) - 56) ascii += '\x00';
+      for (let i = 0; i < ascii.length; i++) {
+        const j = ascii.charCodeAt(i);
+        words[i >> 2] |= j << (((3 - i) % 4) * 8);
+      }
+      words[words.length] = (asciiBitLength / maxWord) | 0;
+      words[words.length] = asciiBitLength;
+
+      for (let j = 0; j < words.length;) {
+        const w = words.slice(j, (j += 16));
+        const oldHash = hash.slice(0);
+        for (let i = 0; i < 64; i++) {
+          const w15 = w[i - 15], w2 = w[i - 2];
+          const a = hash[0], e = hash[4];
+          const temp1 =
+            hash[7] +
+            (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) +
+            ((e & hash[5]) ^ (~e & hash[6])) +
+            k[i] +
+            (w[i] =
+              i < 16
+                ? w[i]
+                : (w[i - 16] +
+                    (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) +
+                    w[i - 7] +
+                    (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) |
+                  0);
+          const temp2 =
+            (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) +
+            ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+
+          hash.unshift((temp1 + temp2) | 0);
+          hash[4] = (hash[4] + temp1) | 0;
+          hash.pop();
+        }
+        for (let i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+      }
+
+      for (let i = 0; i < 8; i++) {
+        for (let j = 3; j + 1; j--) {
+          const b = (hash[i] >> (j * 8)) & 255;
+          result += (b < 16 ? '0' : '') + b.toString(16);
+        }
+      }
+      return result;
+    }
+
+    function getActiveCredentials() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_CREDS);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.adminUsername && parsed.adminPassword && parsed.salesUsername && parsed.salesPassword) {
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      return { ...AUTH_CONFIG };
+    }
+
+    function syncCredentialInputs() {
+      const creds = getActiveCredentials();
+      const au = document.getElementById('cred-admin-user');
+      const ap = document.getElementById('cred-admin-pass');
+      const su = document.getElementById('cred-sales-user');
+      const sp = document.getElementById('cred-sales-pass');
+      if (au) au.value = creds.adminUsername;
+      if (ap) ap.value = creds.adminPassword;
+      if (su) su.value = creds.salesUsername;
+      if (sp) sp.value = creds.salesPassword;
+    }
+
+    function saveUpdatedCredentials() {
+      if (!isAdmin()) return;
+      const adminUsername = document.getElementById('cred-admin-user').value.trim();
+      const adminPassword = document.getElementById('cred-admin-pass').value;
+      const salesUsername = document.getElementById('cred-sales-user').value.trim();
+      const salesPassword = document.getElementById('cred-sales-pass').value;
+
+      if (!adminUsername || !adminPassword || !salesUsername || !salesPassword) {
+        showToast('All username and password fields are required');
+        return;
+      }
+      if (adminUsername.toLowerCase() === salesUsername.toLowerCase()) {
+        showToast('Admin and Sales usernames must be different');
+        return;
+      }
+
+      try {
+        localStorage.setItem(STORAGE_KEY_CREDS, JSON.stringify({
+          adminUsername,
+          adminPassword,
+          salesUsername,
+          salesPassword
+        }));
+      } catch (e) {}
+      showToast('Updated login credentials saved!');
+    }
+
+    function resetCredentialsToConfig() {
+      if (!isAdmin()) return;
+      try { localStorage.removeItem(STORAGE_KEY_CREDS); } catch (e) {}
+      syncCredentialInputs();
+      showToast('Reset credentials to AUTH_CONFIG defaults');
+    }
+
+    function checkExistingSession() {
+      try {
+        const raw = sessionStorage.getItem(SESSION_AUTH_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.username && parsed.role) {
+            currentUser = parsed;
+            unlockAppUI();
+            return;
+          }
+        }
+      } catch (e) {}
+      lockAppUI();
+    }
+
+    function lockAppUI() {
+      currentUser = null;
+      const gate = document.getElementById('login-gate-overlay');
+      gate.classList.remove('hidden');
+      gate.classList.add('flex');
+      document.getElementById('login-password').value = '';
+    }
+
+    function unlockAppUI() {
+      const gate = document.getElementById('login-gate-overlay');
+      gate.classList.add('hidden');
+      gate.classList.remove('flex');
+      applyRolePermissions();
+      syncCredentialInputs();
+      renderRowsEditor();
+      renderPreview();
+    }
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const userVal = document.getElementById('login-username').value.trim().toLowerCase();
+      const passVal = document.getElementById('login-password').value;
+      const errorBox = document.getElementById('login-error-box');
+
+      const creds = getActiveCredentials();
+      const enteredHash = sha256Hex(passVal);
+      const adminHash = sha256Hex(creds.adminPassword);
+      const salesHash = sha256Hex(creds.salesPassword);
+
+      let matchedRole = null;
+      let matchedName = '';
+
+      if (userVal === creds.adminUsername.trim().toLowerCase() && enteredHash === adminHash) {
+        matchedRole = 'admin';
+        matchedName = creds.adminUsername.trim();
+      } else if (userVal === creds.salesUsername.trim().toLowerCase() && enteredHash === salesHash) {
+        matchedRole = 'sales';
+        matchedName = creds.salesUsername.trim();
+      }
+
+      if (!matchedRole) {
+        errorBox.classList.remove('hidden');
+        return;
+      }
+
+      errorBox.classList.add('hidden');
+      currentUser = { username: matchedName, role: matchedRole };
+      try {
+        sessionStorage.setItem(SESSION_AUTH_KEY, JSON.stringify(currentUser));
+      } catch (err) {}
+
+      unlockAppUI();
+      showToast(`Signed in as ${matchedName.toUpperCase()} (${matchedRole.toUpperCase()})`);
+    }
     ];
 
     const SESSION_AUTH_KEY = 'ecco_session_auth_v1';
