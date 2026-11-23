@@ -1,0 +1,2903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ECCO Supplier Price List &amp; Cipher Code Generator</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ecco-navy: #142842;
+      --ecco-steel: #1E3A5F;
+      --ecco-accent: #2B5B9E;
+      --ecco-tint: #E8F0F8;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Classic Word-Style Arial Printable Sheet */
+    .word-sheet {
+      font-family: Arial, Helvetica, sans-serif !important;
+      color: #000000 !important;
+      background: #ffffff !important;
+    }
+
+    .word-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #000000;
+    }
+
+    .word-table thead {
+      display: table-header-group;
+    }
+
+    .word-table th,
+    .word-table td {
+      border: 1px solid #000000;
+      text-align: center;
+      vertical-align: middle;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .word-table th {
+      font-weight: bold;
+      line-height: 1.25;
+    }
+
+    .word-table td {
+      font-weight: normal;
+      line-height: 1.25;
+    }
+
+    .word-table tr.section-divider-row td {
+      font-weight: bold !important;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* ECCO Printable Sheet Theme */
+    .sheet-theme-ecco .ecco-sheet-banner {
+      background-color: #1E3A5F !important;
+      color: #FFFFFF !important;
+      padding: 10px 14px;
+      border: 1.5px solid #000000;
+      margin-bottom: 10px;
+    }
+    .sheet-theme-ecco .word-table th {
+      background-color: #E8F0F8 !important;
+      color: #000000 !important;
+    }
+    .sheet-theme-ecco .word-table tr.section-divider-row td {
+      background-color: #F1F5F9 !important;
+      color: #0F172A !important;
+    }
+    .sheet-theme-ecco .markup-guide-box {
+      border: 1.5px solid #1E3A5F;
+      background-color: #E8F0F8 !important;
+      color: #000000 !important;
+    }
+
+    /* Classic Light Printable Sheet Theme */
+    .sheet-theme-classic .ecco-sheet-banner {
+      background-color: #FFFFFF !important;
+      color: #000000 !important;
+      border-bottom: 2px solid #000000;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+    .sheet-theme-classic .word-table th {
+      background-color: #FFFFFF !important;
+      color: #000000 !important;
+    }
+    .sheet-theme-classic .word-table tr.section-divider-row td {
+      background-color: #F3F4F6 !important;
+      color: #000000 !important;
+    }
+    .sheet-theme-classic .markup-guide-box {
+      border: 1.5px solid #000000;
+      background-color: #FFFFFF !important;
+      color: #000000 !important;
+    }
+
+    /* Paper Dimensions Simulation on Screen */
+    .paper-a4 { width: 210mm; min-height: 297mm; }
+    .paper-letter { width: 215.9mm; min-height: 279.4mm; }
+    .paper-long { width: 215.9mm; min-height: 330.2mm; }
+
+    @media screen and (max-width: 1023px) {
+      .paper-sheet {
+        width: 100% !important;
+        min-height: auto !important;
+      }
+      input[type="text"],
+      input[type="number"],
+      input[type="password"],
+      input[type="search"],
+      select,
+      textarea {
+        font-size: 16px !important;
+      }
+    }
+
+    /* Interactive Direct-Edit Highlights inside Full-Screen Preview Modal */
+    .preview-editable-mode [data-editable] {
+      cursor: text;
+      border-radius: 2px;
+      transition: background-color 0.15s ease, outline-color 0.15s ease;
+    }
+    .preview-editable-mode [data-editable]:hover {
+      background-color: rgba(43, 91, 158, 0.12);
+      outline: 1.5px dashed #2B5B9E;
+      outline-offset: -1px;
+    }
+    .preview-editable-mode [data-editable]:focus {
+      background-color: rgba(43, 91, 158, 0.18);
+      outline: 2px solid #1E3A5F;
+      outline-offset: -1px;
+    }
+
+    /* Dedicated Print Styles */
+    @media print {
+      @page {
+        margin: 12mm 14mm;
+      }
+
+      html, body {
+        background: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .no-print,
+      #login-gate-overlay,
+      #fullscreen-preview-modal {
+        display: none !important;
+      }
+
+      #app-shell {
+        display: block !important;
+      }
+
+      #preview-pane {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #ffffff !important;
+        overflow: visible !important;
+      }
+
+      #paper-scale-wrapper {
+        transform: none !important;
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+      }
+
+      #paper-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+      }
+
+      .word-table tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased pb-20 lg:pb-0">
+
+  <!-- Hidden File Input for JSON Backup Import -->
+  <input type="file" id="json-import-input" accept=".json,application/json" class="hidden" onchange="handleImportBackupFile(event)" />
+
+  <!-- ======================================================================= -->
+  <!-- 1. ECCO STAFF & ADMIN LOGIN GATE (sessionStorage + SHA-256)             -->
+  <!-- ======================================================================= -->
+  <div id="login-gate-overlay" class="no-print fixed inset-0 z-[100] bg-gradient-to-br from-[#0f1f33] via-[#1E3A5F] to-[#142842] flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-sky-200/30">
+      <!-- Top Brand Header -->
+      <div class="bg-[#142842] px-6 py-6 text-center border-b border-[#2B5B9E]/40">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-white text-[#1E3A5F] flex items-center justify-center font-extrabold text-lg tracking-wider shadow-md mb-3">
+          ECCO
+        </div>
+        <h1 class="text-lg font-extrabold text-white tracking-tight">ECCO Hardware Pricing Portal</h1>
+        <p class="text-xs text-sky-200/85 mt-1">Authorized Staff &amp; Admin Access Only</p>
+      </div>
+
+      <!-- Login Form -->
+      <form onsubmit="handleLoginSubmit(event)" class="p-6 sm:p-7 space-y-4">
+        <div id="login-error-box" class="hidden bg-rose-50 border border-rose-200 text-rose-700 px-3.5 py-2.5 rounded-xl text-xs font-semibold">
+          Invalid username or password. Please try again.
+        </div>
+
+        <div>
+          <label for="login-username" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Username</label>
+          <input
+            type="text"
+            id="login-username"
+            autocomplete="username"
+            required
+            placeholder="Enter username"
+            class="w-full min-h-[46px] px-3.5 py-2.5 text-sm font-medium bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:border-[#1E3A5F]"
+          />
+        </div>
+
+        <div>
+          <label for="login-password" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password</label>
+          <div class="relative flex items-center">
+            <input
+              type="password"
+              id="login-password"
+              autocomplete="current-password"
+              required
+              placeholder="Enter password"
+              class="w-full min-h-[46px] pl-3.5 pr-12 py-2.5 text-sm font-medium bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:border-[#1E3A5F]"
+            />
+            <button type="button" onclick="toggleLoginPasswordVisibility()" class="absolute right-2.5 px-2 py-1 text-[11px] font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
+              Show
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full min-h-[48px] py-3 px-4 rounded-xl bg-[#1E3A5F] hover:bg-[#142842] active:scale-[0.99] text-white font-bold text-sm shadow-md transition cursor-pointer">
+          Sign In to Price List
+        </button>
+
+        <div class="pt-2 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
+          <div class="flex items-center justify-between">
+            <span><b>Admin</b> (Full Edit): <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">admin</code> / <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">ecco2026</code></span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span><b>Sales</b> (View &amp; Calc): <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">sales</code> / <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">counter2026</code></span>
+          </div>
+          <p class="text-[10px] text-slate-400 pt-1">Session automatically locks when closing this tab or clicking Log Out.</p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Banner -->
+  <div id="toast-banner" class="no-print fixed bottom-20 lg:bottom-5 right-4 left-4 sm:left-auto sm:right-5 z-[95] transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-[#142842] text-white px-4 py-3 rounded-xl shadow-xl border border-[#2B5B9E]/40 flex items-center gap-2.5 text-sm font-medium">
+      <svg class="w-4 h-4 text-sky-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+      <span id="toast-message">Action completed</span>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirm-modal" class="no-print fixed inset-0 z-[95] hidden items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200">
+      <h3 id="confirm-title" class="text-base font-bold text-slate-900">Confirm Action</h3>
+      <p id="confirm-desc" class="text-sm text-slate-600 mt-2">Are you sure?</p>
+      <div class="mt-6 flex justify-end gap-2.5">
+        <button id="confirm-cancel" class="min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition cursor-pointer">Cancel</button>
+        <button id="confirm-ok" class="min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 transition cursor-pointer">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- COUNTER SELLING PRICE CALCULATOR MODAL (WITH LOOSE-CUT BREAKDOWN)       -->
+  <!-- ======================================================================= -->
+  <div id="calc-modal" class="no-print fixed inset-0 z-[85] hidden items-center justify-center bg-slate-950/65 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 max-h-[92vh] overflow-y-auto">
+      <div class="bg-[#1E3A5F] text-white px-5 py-4 flex items-center justify-between">
+        <div>
+          <div class="text-[10px] font-bold uppercase tracking-wider text-sky-200">Counter Retail Price Calculator</div>
+          <h3 id="calc-item-title" class="text-sm sm:text-base font-bold leading-snug mt-0.5">ITEM DESCRIPTION</h3>
+        </div>
+        <button type="button" onclick="closeCalcModal()" class="p-2 rounded-xl text-sky-200 hover:text-white hover:bg-[#142842] cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <!-- Capital & Discount Breakdown -->
+        <div class="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
+          <div>
+            <div class="text-[10px] font-bold uppercase text-slate-400">Capital Code</div>
+            <div id="calc-code-val" class="text-sm font-mono font-extrabold text-[#1E3A5F] mt-0.5">&mdash;</div>
+            <div id="calc-unit-badge" class="text-[10px] font-semibold text-slate-500 mt-0.5">PER PC</div>
+          </div>
+          <div>
+            <div class="text-[10px] font-bold uppercase text-slate-400">Base Capital</div>
+            <div id="calc-base-peso" class="text-sm font-mono font-bold text-slate-800 mt-0.5">&mdash;</div>
+            <div id="calc-disc-label" class="text-[10px] font-mono text-emerald-700 mt-0.5">No Disc.</div>
+          </div>
+          <div>
+            <div class="text-[10px] font-bold uppercase text-slate-400">Net Capital</div>
+            <div id="calc-net-peso" class="text-sm font-mono font-extrabold text-slate-900 mt-0.5">&mdash;</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">Rounded Up</div>
+          </div>
+        </div>
+
+        <!-- Cash & Credit Retail Selling Prices -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-emerald-50 border-2 border-emerald-500/40 rounded-2xl p-3.5 text-center">
+            <div id="calc-cash-header" class="text-[11px] font-extrabold uppercase text-emerald-900">CASH (+10% / CX%)</div>
+            <div id="calc-cash-price" class="text-2xl font-mono font-extrabold text-emerald-700 mt-1">&#8369;0</div>
+            <div class="text-[10px] text-emerald-800/80 mt-0.5">Whole Unit Cash SRP</div>
+          </div>
+
+          <div class="bg-amber-50 border-2 border-amber-500/40 rounded-2xl p-3.5 text-center">
+            <div id="calc-credit-header" class="text-[11px] font-extrabold uppercase text-amber-900">CREDIT (+15% / CK%)</div>
+            <div id="calc-credit-price" class="text-2xl font-mono font-extrabold text-amber-700 mt-1">&#8369;0</div>
+            <div class="text-[10px] text-amber-900/80 mt-0.5">Whole Unit Credit SRP</div>
+          </div>
+        </div>
+
+        <!-- Loose-Cut / Sub-Unit Breakdown (For Rolls, Pails, Boxes, Lengths) -->
+        <div class="bg-[#E8F0F8]/70 border border-[#2B5B9E]/30 rounded-2xl p-3.5 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-[#142842]">Loose-Cut / Sub-Unit Breakdown</span>
+            <span class="text-[10px] font-semibold text-[#2B5B9E]">Roll / Pail / Box</span>
+          </div>
+          <p class="text-[11px] text-slate-600 leading-snug">Divide bulk price by meters per roll, liters per pail, or pieces per box:</p>
+
+          <div class="flex items-center gap-2">
+            <input
+              type="number"
+              id="calc-sub-qty"
+              min="1"
+              step="any"
+              placeholder="e.g. 100 (meters) or 20 (liters)"
+              oninput="recomputeSubUnitBreakdown()"
+              class="flex-1 min-h-[42px] px-3 py-2 text-xs font-mono bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A5F]"
+            />
+            <div class="flex gap-1">
+              <button type="button" onclick="setCalcSubPreset(20)" class="min-h-[42px] px-2.5 py-1 rounded-xl text-[11px] font-bold bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 cursor-pointer">20L</button>
+              <button type="button" onclick="setCalcSubPreset(100)" class="min-h-[42px] px-2.5 py-1 rounded-xl text-[11px] font-bold bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 cursor-pointer">100m</button>
+              <button type="button" onclick="setCalcSubPreset(150)" class="min-h-[42px] px-2.5 py-1 rounded-xl text-[11px] font-bold bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 cursor-pointer">150m</button>
+            </div>
+          </div>
+
+          <div id="calc-sub-result" class="hidden grid grid-cols-2 gap-2 pt-1">
+            <div class="bg-white rounded-xl p-2.5 border border-emerald-200 text-center">
+              <div class="text-[10px] font-bold uppercase text-slate-500">Per Cut/Unit Cash</div>
+              <div id="calc-sub-cash" class="text-base font-mono font-extrabold text-emerald-700 mt-0.5">&#8369;0</div>
+            </div>
+            <div class="bg-white rounded-xl p-2.5 border border-amber-200 text-center">
+              <div class="text-[10px] font-bold uppercase text-slate-500">Per Cut/Unit Credit</div>
+              <div id="calc-sub-credit" class="text-base font-mono font-extrabold text-amber-700 mt-0.5">&#8369;0</div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" onclick="closeCalcModal()" class="w-full min-h-[44px] py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition cursor-pointer">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- BULK PRICE ADJUSTMENT MODAL (+5%, +10%, +PESO)                          -->
+  <!-- ======================================================================= -->
+  <div id="bulk-adjust-modal" class="no-print fixed inset-0 z-[85] hidden items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 sm:p-6 border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Bulk Price Adjustment</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Adjust all item prices in this sheet, auto round-up cents, re-encode cipher &amp; flag with <code class="bg-slate-100 px-1 rounded">&#9650;</code>.</p>
+        </div>
+        <button type="button" onclick="closeBulkAdjustModal()" class="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5">
+        <div>
+          <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Adjustment Type</label>
+          <select id="bulk-adj-type" class="w-full min-h-[44px] px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A5F]">
+            <option value="percent">Percentage (+% / -%)</option>
+            <option value="fixed">Fixed Peso Amount (+&#8369; / -&#8369;)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Value (e.g. 5 or 10)</label>
+          <input type="number" step="any" id="bulk-adj-value" placeholder="5" class="w-full min-h-[44px] px-3 py-2 text-sm font-mono bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A5F]" />
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-1.5">
+        <button type="button" onclick="quickSetBulkAdj('percent', 3)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#E8F0F8] text-[#1E3A5F] hover:bg-[#d8e6f5] cursor-pointer">+3%</button>
+        <button type="button" onclick="quickSetBulkAdj('percent', 5)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#E8F0F8] text-[#1E3A5F] hover:bg-[#d8e6f5] cursor-pointer">+5%</button>
+        <button type="button" onclick="quickSetBulkAdj('percent', 10)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#E8F0F8] text-[#1E3A5F] hover:bg-[#d8e6f5] cursor-pointer">+10%</button>
+        <button type="button" onclick="quickSetBulkAdj('fixed', 5)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">+&#8369;5</button>
+        <button type="button" onclick="quickSetBulkAdj('fixed', 10)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">+&#8369;10</button>
+      </div>
+
+      <label class="inline-flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
+        <input type="checkbox" id="bulk-adj-flag" checked class="w-4 h-4 rounded text-[#1E3A5F]" />
+        <span>Mark adjusted rows with <code class="bg-amber-100 text-amber-900 px-1 rounded font-bold">&#9650;</code> price update indicator</span>
+      </label>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" onclick="closeBulkAdjustModal()" class="min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 cursor-pointer">Cancel</button>
+        <button type="button" onclick="applyBulkPriceAdjustment()" class="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#1E3A5F] hover:bg-[#142842] cursor-pointer">Apply Adjustment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- SHAREABLE LINK & QR CODE MODAL                                          -->
+  <!-- ======================================================================= -->
+  <div id="share-modal" class="no-print fixed inset-0 z-[85] hidden items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 sm:p-6 border border-slate-200 space-y-4 text-center">
+      <div class="flex items-center justify-between text-left">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Share Supplier Price Sheet</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Scan QR or copy link to open this exact sheet on another phone.</p>
+        </div>
+        <button type="button" onclick="closeShareModal()" class="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Pure-JS SVG Matrix / QR Visual -->
+      <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center">
+        <img id="share-qr-img" alt="QR Code for Sheet Link" class="w-44 h-44 rounded-xl border border-slate-200 bg-white p-2" onerror="this.style.display='none'" />
+        <p id="share-qr-caption" class="text-[11px] text-slate-500 mt-2">Point coworker's phone camera to load sheet</p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <input type="text" id="share-url-input" readonly class="flex-1 min-h-[42px] px-3 py-2 text-xs font-mono bg-slate-50 border border-slate-300 rounded-xl text-slate-700" />
+        <button type="button" onclick="copyShareUrl()" class="min-h-[42px] px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#1E3A5F] hover:bg-[#142842] shrink-0 cursor-pointer">
+          Copy Link
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- QUICK BULK PASTE MODAL                                                  -->
+  <!-- ======================================================================= -->
+  <div id="bulk-modal" class="no-print fixed inset-0 z-[85] hidden items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-5 sm:p-6 border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Quick Bulk Paste</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Paste Description, Net Price, Discount &amp; Unit — codes auto-calculate.</p>
+        </div>
+        <button type="button" onclick="closeBulkModal()" class="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="bg-[#E8F0F8]/70 border border-[#2B5B9E]/25 rounded-xl p-3 text-xs text-slate-700 space-y-1">
+        <div class="font-semibold text-[#1E3A5F]">Accepted formats (one item per line):</div>
+        <div class="font-mono text-[11px] text-slate-700">
+          BOYSEN QUICK DRY ENAMEL WHITE, 645.20, 10%, GAL<br/>
+          LACQUER THINNER PURE, 132.09, 5%, LTR<br/>
+          THHN WIRE #12 STRANDED (150M), 3480, 10/5, ROLL<br/>
+          --- PVC &amp; GI FITTINGS --- &nbsp;<span class="text-slate-500">(section divider)</span>
+        </div>
+      </div>
+
+      <textarea id="bulk-textarea" rows="7" placeholder="BOYSEN QUICK DRY ENAMEL WHITE, 645.20, 10%, GAL&#10;LACQUER THINNER PURE, 132.09, 5%, LTR&#10;--- WIRES &amp; HOSES ---&#10;THHN WIRE #12 STRANDED, 3480, 10/5, ROLL" class="w-full p-3 text-sm font-mono rounded-xl border border-slate-300 focus:outline-none focus:border-[#1E3A5F]"></textarea>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+        <label class="inline-flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer min-h-[40px]">
+          <input type="checkbox" id="bulk-replace-check" checked class="w-4 h-4 rounded text-[#1E3A5F]" />
+          <span>Replace existing rows</span>
+        </label>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeBulkModal()" class="min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 cursor-pointer">Cancel</button>
+          <button type="button" onclick="processBulkPaste()" class="min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold text-white bg-[#1E3A5F] hover:bg-[#142842] cursor-pointer">Generate Rows</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- FULL-SCREEN INTERACTIVE PRINTABLE PREVIEW & DIRECT-EDIT MODAL           -->
+  <!-- ======================================================================= -->
+  <div id="fullscreen-preview-modal" class="no-print fixed inset-0 z-50 hidden flex-col bg-slate-950/90 backdrop-blur-xs">
+    <div class="bg-white border-b border-slate-200 px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2 shrink-0">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button type="button" onclick="closeFullscreenPreview()" class="min-h-[40px] px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition flex items-center gap-1.5 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 19l-7-7 7-7"/></svg>
+          <span>Back</span>
+        </button>
+        <div class="hidden md:block">
+          <div class="text-xs font-bold text-slate-900">Printable Sheet Preview</div>
+          <div id="modal-edit-hint" class="text-[11px] text-[#2B5B9E] font-medium">Tap any text or price inside the sheet below to edit directly</div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+        <div id="modal-edit-switch-group" class="flex bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+          <button type="button" id="modal-mode-edit" onclick="setModalEditMode(true)" class="min-h-[36px] px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#1E3A5F] text-white shadow-2xs transition cursor-pointer flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+            <span>Edit Directly</span>
+          </button>
+          <button type="button" id="modal-mode-clean" onclick="setModalEditMode(false)" class="min-h-[36px] px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-600 hover:text-slate-900 transition cursor-pointer">
+            Clean Print
+          </button>
+        </div>
+
+        <button type="button" id="modal-toggle-safe" onclick="toggleSafePriceMode()" class="min-h-[36px] px-2.5 py-1 rounded-xl text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition cursor-pointer">
+          Price + Code
+        </button>
+
+        <button type="button" id="modal-toggle-layout" onclick="toggleLayoutMode()" class="hidden sm:inline-flex items-center min-h-[36px] px-2.5 py-1 rounded-xl text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition cursor-pointer">
+          Full Width
+        </button>
+
+        <button type="button" id="modal-toggle-zoom" onclick="toggleModalZoom()" class="min-h-[36px] px-2.5 py-1 rounded-xl text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition cursor-pointer">
+          Fit Screen
+        </button>
+
+        <button type="button" id="modal-add-row-btn" onclick="addRowInPreview()" class="admin-only min-h-[36px] px-2.5 py-1 rounded-xl text-[11px] font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition cursor-pointer">
+          + Row
+        </button>
+
+        <button type="button" onclick="triggerPrintFromModal()" class="min-h-[38px] px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-[#1E3A5F] hover:bg-[#142842] transition shadow-xs flex items-center gap-1.5 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          <span>Print / PDF</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="modal-mobile-tip" class="md:hidden bg-[#1E3A5F] text-white text-[11px] font-medium px-3 py-1.5 text-center shrink-0">
+      Tap any text, price, or discount on the sheet to edit directly
+    </div>
+
+    <div id="modal-scroll-area" class="flex-1 overflow-auto p-3 sm:p-8 flex justify-center items-start">
+      <div id="modal-scale-outer" class="flex justify-center">
+        <div id="modal-paper-container" class="word-sheet sheet-theme-ecco paper-a4 bg-white shadow-2xl px-7 py-9 sm:px-12 sm:py-12 preview-editable-mode transition-transform origin-top">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MAIN APPLICATION SHELL                                                  -->
+  <!-- ======================================================================= -->
+  <div id="app-shell">
+
+    <!-- TOP HEADER BAR -->
+    <header id="top-header" class="no-print sticky top-0 z-30 bg-[#1E3A5F] text-white border-b border-[#142842] px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 shadow-sm transition-colors">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div id="brand-badge" class="w-9 h-9 rounded-xl bg-white text-[#1E3A5F] flex items-center justify-center font-extrabold text-xs tracking-wider shrink-0 shadow-2xs">
+          ECCO
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h1 id="header-title" class="text-sm sm:text-base font-bold text-white leading-tight truncate">ECCO Price List &amp; Cipher</h1>
+            <span id="role-badge" class="px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-300/40 text-emerald-100 text-[10px] font-extrabold uppercase tracking-wider shrink-0">ADMIN</span>
+          </div>
+          <p id="header-subtitle" class="text-[11px] text-sky-200/90 hidden sm:block truncate">Paints, Thinners, Wires, Fittings &amp; Chemical Hose Pricing</p>
+        </div>
+      </div>
+
+      <!-- Right Controls: Theme + Preview + Save + Print + Log Out -->
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <button type="button" id="theme-toggle-btn" onclick="toggleAppTheme()" title="Switch between ECCO Steel-Blue and Classic Light" class="min-h-[40px] px-2.5 py-2 rounded-xl text-xs font-bold bg-[#142842] hover:bg-[#0f1f33] text-sky-100 border border-sky-400/30 transition flex items-center gap-1.5 cursor-pointer">
+          <span id="theme-dot" class="w-2.5 h-2.5 rounded-full bg-sky-400 shrink-0"></span>
+          <span id="theme-label" class="hidden md:inline">ECCO Theme</span>
+        </button>
+
+        <button type="button" id="header-preview-btn" onclick="openFullscreenPreview()" class="min-h-[40px] px-3 py-2 rounded-xl text-xs font-bold text-[#1E3A5F] bg-sky-100 hover:bg-white transition flex items-center gap-1.5 cursor-pointer">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          <span class="hidden sm:inline">Preview</span>
+        </button>
+
+        <button type="button" id="header-save-btn" onclick="saveCurrentSheet()" class="admin-only hidden md:flex min-h-[40px] px-3 py-2 rounded-xl text-xs font-semibold text-white bg-[#2B5B9E] hover:bg-[#356cb8] transition items-center gap-1.5 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+          <span>Save</span>
+        </button>
+
+        <button type="button" id="header-print-btn" onclick="window.print()" class="min-h-[40px] px-3 py-2 rounded-xl text-xs font-bold text-[#142842] bg-white hover:bg-sky-50 transition shadow-xs flex items-center gap-1.5 cursor-pointer">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          <span class="hidden sm:inline">Print</span>
+        </button>
+
+        <!-- Prominent Log Out Button -->
+        <button type="button" onclick="handleLogout()" title="Lock & Log Out" class="min-h-[40px] px-2.5 sm:px-3 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition flex items-center gap-1.5 cursor-pointer shadow-xs">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          <span>Log Out</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="flex flex-col lg:flex-row lg:h-[calc(100vh-61px)] lg:overflow-hidden">
+
+      <!-- LEFT EDITOR / COUNTER WORKSPACE -->
+      <section id="editor-pane" class="no-print w-full lg:w-[595px] xl:w-[650px] shrink-0 bg-white border-r border-slate-200 lg:overflow-y-auto p-3.5 sm:p-5 space-y-4">
+
+        <!-- QUICK CODE CHECK BAR (Available to Both Admin & Sales) -->
+        <div class="bg-[#E8F0F8]/80 border border-[#2B5B9E]/30 rounded-2xl overflow-hidden">
+          <button type="button" onclick="toggleQuickCheckDrawer()" class="w-full px-3.5 py-2.5 flex items-center justify-between text-left hover:bg-[#E8F0F8] transition cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-md bg-[#1E3A5F] text-white text-[10px] font-bold uppercase tracking-wider">Quick Code Check</span>
+              <span class="text-xs font-semibold text-[#142842]">Counter Decoder &amp; Encoder Lookup</span>
+            </div>
+            <svg id="quick-check-chevron" class="w-4 h-4 text-[#1E3A5F] transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+
+          <div id="quick-check-body" class="hidden px-3.5 pb-3.5 pt-1 border-t border-[#2B5B9E]/20 space-y-2.5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                <label class="block text-[10px] font-bold uppercase text-[#1E3A5F] mb-1">Decode Tag Code &rarr; Pesos</label>
+                <div class="flex items-center gap-2">
+                  <input type="text" id="quick-decode-input" placeholder="e.g. BCYY or RCXAICO" oninput="runQuickDecode(this.value)" class="w-full min-h-[40px] px-2.5 py-1.5 text-xs font-mono font-bold uppercase bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:border-[#1E3A5F]" />
+                  <div id="quick-decode-output" class="min-w-[84px] min-h-[40px] px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900 font-mono font-bold text-xs flex items-center justify-center">
+                    &mdash;
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                <label class="block text-[10px] font-bold uppercase text-[#1E3A5F] mb-1">Encode Price &rarr; Tag Code</label>
+                <div class="flex items-center gap-2">
+                  <input type="text" id="quick-encode-input" inputmode="decimal" placeholder="e.g. 132.09" oninput="runQuickEncode(this.value)" class="w-full min-h-[40px] px-2.5 py-1.5 text-xs font-mono bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:outline-none focus:border-[#1E3A5F]" />
+                  <div id="quick-encode-output" class="min-w-[84px] min-h-[40px] px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-950 font-mono font-bold text-xs flex items-center justify-center">
+                    &mdash;
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-600 font-mono pt-0.5">
+              <span>Key: <b>1</b>=C <b>2</b>=O <b>3</b>=Y <b>4</b>=U <b>5</b>=K <b>6</b>=H <b>7</b>=I <b>8</b>=A <b>9</b>=N <b>0</b>=X</span>
+              <span>Whole Digits: <b>1</b>=M · <b>2</b>=E · <b>3</b>=B · <b>4</b>=R · <b>5</b>=S · <b>6</b>=T</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SAVED SUPPLIER SHEETS LIBRARY WITH DEPARTMENT FILTER PILLS -->
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Supplier Price Lists</span>
+            <div class="admin-only flex items-center gap-3">
+              <button type="button" onclick="saveCurrentSheet()" class="md:hidden text-xs font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer">Save</button>
+              <button type="button" onclick="createNewBlankSheet()" class="text-xs font-bold text-[#2B5B9E] hover:text-[#142842] cursor-pointer">+ New Sheet</button>
+            </div>
+          </div>
+
+          <!-- Department Filter Pills -->
+          <div id="dept-filter-pills" class="flex items-center gap-1.5 overflow-x-auto pb-1">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <div class="flex items-center gap-2">
+            <select id="saved-sheets-select" onchange="loadSavedSheet(this.value)" class="flex-1 min-h-[44px] px-3 py-2 text-xs font-semibold bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A5F]">
+            </select>
+            <button type="button" onclick="openShareModal()" title="Share Sheet Link & QR Code" class="min-h-[44px] min-w-[44px] flex items-center justify-center text-[#1E3A5F] hover:bg-[#E8F0F8] rounded-xl border border-slate-200 bg-white transition cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+            </button>
+            <button type="button" onclick="confirmDeleteSavedSheet()" title="Delete selected saved sheet" class="admin-only min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl border border-slate-200 bg-white transition cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>
+
+          <!-- JSON Backup & CSV Export Toolbar -->
+          <div class="grid grid-cols-3 gap-1.5 pt-0.5">
+            <button type="button" onclick="exportAllSheetsJson()" class="min-h-[38px] px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition flex items-center justify-center gap-1 cursor-pointer">
+              <svg class="w-3.5 h-3.5 text-[#2B5B9E] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              <span>Export JSON</span>
+            </button>
+
+            <button type="button" onclick="triggerImportBackup()" class="admin-only min-h-[38px] px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition flex items-center justify-center gap-1 cursor-pointer">
+              <svg class="w-3.5 h-3.5 text-[#2B5B9E] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              <span>Import JSON</span>
+            </button>
+
+            <button type="button" onclick="exportCurrentSheetCsv()" class="min-h-[38px] px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition flex items-center justify-center gap-1 cursor-pointer">
+              <svg class="w-3.5 h-3.5 text-emerald-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <span>Export CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ADMIN-ONLY SUPPLIER HEADER, MARKUP GUIDE & TABLE SETTINGS -->
+        <div id="settings-accordion-wrapper" class="admin-only bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden">
+          <button type="button" onclick="toggleHeaderAccordion()" class="w-full px-4 py-3.5 flex items-center justify-between text-left bg-slate-50 hover:bg-slate-100/70 transition cursor-pointer">
+            <div>
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700">Supplier Header, Markup Guide &amp; Layout</h2>
+              <p class="text-[11px] text-slate-500 mt-0.5">Company banner, CASH + CX% / CREDIT + CK%, Round-Up Cents &amp; paper size</p>
+            </div>
+            <svg id="accordion-chevron" class="w-5 h-5 text-slate-500 transform rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+
+          <div id="header-settings-body" class="p-4 pt-2 space-y-3.5 border-t border-slate-200/70">
+            <!-- Supplier Visibility + Department Tag -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-center pt-1">
+              <label class="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer min-h-[38px]">
+                <input type="checkbox" id="check-show-supplier" checked onchange="updateMeta('showSupplier', this.checked)" class="w-4 h-4 rounded text-[#1E3A5F]" />
+                <span>Show Supplier Banner</span>
+              </label>
+
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Sheet Department</label>
+                <select id="input-department" onchange="updateMeta('department', this.value)" class="w-full min-h-[38px] px-2.5 py-1.5 text-xs font-bold bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A5F]">
+                  <option value="PAINTS">PAINTS</option>
+                  <option value="THINNERS">THINNERS</option>
+                  <option value="WIRES">WIRES</option>
+                  <option value="FITTINGS">FITTINGS</option>
+                  <option value="HOSES">HOSES</option>
+                  <option value="GENERAL">GENERAL HARDWARE</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Supplier Name & Sub-line -->
+            <div id="supplier-inputs-group" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-white p-3 rounded-xl border border-slate-200/90">
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Supplier / Brand Name</label>
+                <input type="text" id="input-supplier" placeholder="PACIFIC PAINT (BOYSEN) PHILS., INC." oninput="updateMeta('supplierName', this.value)" class="w-full min-h-[42px] px-3 py-2 text-xs font-bold uppercase bg-slate-50 rounded-lg border border-slate-300 focus:bg-white focus:outline-none focus:border-[#1E3A5F]" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Terms / Contact Line</label>
+                <input type="text" id="input-supplier-sub" placeholder="DEALER WHOLESALE PRICE & CIPHER LIST" oninput="updateMeta('supplierSub', this.value)" class="w-full min-h-[42px] px-3 py-2 text-xs bg-slate-50 rounded-lg border border-slate-300 focus:bg-white focus:outline-none focus:border-[#1E3A5F]" />
+              </div>
+            </div>
+
+            <!-- Title & Effective Date with Today Auto-Stamp -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Price List Title</label>
+                <input type="text" id="input-title" placeholder="PAINTS, THINNERS & COATINGS" oninput="updateMeta('title', this.value)" class="w-full min-h-[42px] px-3 py-2 text-xs font-semibold bg-white rounded-xl border border-slate-300 focus:outline-none focus:border-[#1E3A5F]" />
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="text-[11px] font-semibold text-slate-600">Effective Date</label>
+                  <button type="button" onclick="stampTodayDate()" class="text-[10px] font-bold text-[#2B5B9E] hover:underline cursor-pointer">Today</button>
+                </div>
+                <input type="text" id="input-subtitle" placeholder="AS OF NOVEMBER 2026" oninput="updateMeta('subtitle', this.value)" class="w-full min-h-[42px] px-3 py-2 text-xs bg-white rounded-xl border border-slate-300 focus:outline-none focus:border-[#1E3A5F]" />
+              </div>
+            </div>
+
+            <!-- Top-Right Markup Reminder Box Settings (CASH + CX% / CREDIT + CK%) -->
+            <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase text-[#1E3A5F]">Top-Right Sales Markup Reminder</span>
+                <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 cursor-pointer">
+                  <input type="checkbox" id="check-show-markup" checked onchange="updateMeta('showMarkupGuide', this.checked)" class="w-4 h-4 rounded text-[#1E3A5F]" />
+                  <span>Show on Sheet</span>
+                </label>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Cash Line (Label)</label>
+                  <input type="text" id="input-cash-label" value="CASH + CX%" oninput="updateMeta('cashMarkupLabel', this.value)" class="w-full min-h-[38px] px-2.5 py-1.5 text-xs font-mono font-bold uppercase bg-slate-50 rounded-lg border border-slate-300 focus:outline-none focus:border-[#1E3A5F]" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Credit Line (Label)</label>
+                  <input type="text" id="input-credit-label" value="CREDIT + CK%" oninput="updateMeta('creditMarkupLabel', this.value)" class="w-full min-h-[38px] px-2.5 py-1.5 text-xs font-mono font-bold uppercase bg-slate-50 rounded-lg border border-slate-300 focus:outline-none focus:border-[#1E3A5F]" />
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">Calc Cash % (for Counter Popup)</label>
+                  <input type="number" step="any" id="input-cash-pct" value="10" oninput="updateMeta('cashMarkupPct', Number(this.value) || 0)" class="w-full min-h-[36px] px-2.5 py-1 text-xs font-mono bg-slate-50 rounded-lg border border-slate-300" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-semibold text-slate-500 mb-0.5">Calc Credit % (for Counter Popup)</label>
+                  <input type="number" step="any" id="input-credit-pct" value="15" oninput="updateMeta('creditMarkupPct', Number(this.value) || 0)" class="w-full min-h-[36px] px-2.5 py-1 text-xs font-mono bg-slate-50 rounded-lg border border-slate-300" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Cents Rounding & Unit Column Toggles -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-white p-3 rounded-xl border border-slate-200">
+              <label class="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                <input type="checkbox" id="check-round-up" checked onchange="toggleRoundUpCents(this.checked)" class="w-4 h-4 rounded text-[#1E3A5F]" />
+                <span>Round Up Cents (<code class="text-[11px] bg-slate-100 px-1 rounded">132.09 &rarr; 133</code>)</span>
+              </label>
+
+              <label class="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                <input type="checkbox" id="check-show-unit" checked onchange="updateMeta('showUnitCol', this.checked)" class="w-4 h-4 rounded text-[#1E3A5F]" />
+                <span>Show UNIT Column on Sheet</span>
+              </label>
+            </div>
+
+            <!-- Layout, Paper Size (A4 / Letter / Long Bond), Font Size -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Table Layout</label>
+                <div class="grid grid-cols-2 bg-white p-1 rounded-xl border border-slate-200">
+                  <button type="button" onclick="updateMeta('layoutMode', 'single')" data-layout-btn="single" class="layout-btn min-h-[36px] py-1 rounded-lg text-xs font-semibold transition cursor-pointer">Full Width</button>
+                  <button type="button" onclick="updateMeta('layoutMode', 'dual')" data-layout-btn="dual" class="layout-btn min-h-[36px] py-1 rounded-lg text-xs font-semibold transition cursor-pointer">Dual Split</button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Paper Size</label>
+                <div class="grid grid-cols-3 bg-white p-1 rounded-xl border border-slate-200">
+                  <button type="button" onclick="updateMeta('paperSize', 'a4')" data-paper-btn="a4" class="paper-btn min-h-[36px] py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer">A4</button>
+                  <button type="button" onclick="updateMeta('paperSize', 'letter')" data-paper-btn="letter" class="paper-btn min-h-[36px] py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer">Letter</button>
+                  <button type="button" onclick="updateMeta('paperSize', 'long')" data-paper-btn="long" class="paper-btn min-h-[36px] py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer">Long</button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Arial Font Size</label>
+                <div class="grid grid-cols-3 bg-white p-1 rounded-xl border border-slate-200">
+                  <button type="button" onclick="updateMeta('fontSize', '13')" data-font-btn="13" class="font-btn min-h-[36px] py-1 rounded-lg text-xs font-semibold transition cursor-pointer">10pt</button>
+                  <button type="button" onclick="updateMeta('fontSize', '15')" data-font-btn="15" class="font-btn min-h-[36px] py-1 rounded-lg text-xs font-semibold transition cursor-pointer">11pt</button>
+                  <button type="button" onclick="updateMeta('fontSize', '17')" data-font-btn="17" class="font-btn min-h-[36px] py-1 rounded-lg text-xs font-semibold transition cursor-pointer">13pt</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Printed Price Display + Duplicate -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-end pt-1">
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Printed Price Display</label>
+                <div class="grid grid-cols-2 bg-white p-1 rounded-xl border border-slate-200">
+                  <button type="button" onclick="updateMeta('priceDisplay', 'both')" data-pdisp-btn="both" class="pdisp-btn min-h-[36px] py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer">Price + Code</button>
+                  <button type="button" onclick="updateMeta('priceDisplay', 'codeOnly')" data-pdisp-btn="codeOnly" class="pdisp-btn min-h-[36px] py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer">Code Only (Safe)</button>
+                </div>
+              </div>
+
+              <div>
+                <button type="button" onclick="duplicateCurrentSheet()" class="w-full min-h-[44px] py-2 px-3 rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition cursor-pointer">
+                  Duplicate Current Sheet
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ITEMS TABLE / COUNTER LIST -->
+        <div class="space-y-3 pb-8">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700">Price List Items &amp; Counter Calculator</h2>
+              <p class="text-[11px] text-slate-500">Tap <b class="text-[#1E3A5F]">Calc</b> on any row to see Cash/Credit SRP &amp; Roll/Pail loose-cut rates.</p>
+            </div>
+
+            <div class="admin-only flex flex-wrap items-center gap-1.5">
+              <button type="button" onclick="openBulkAdjustModal()" class="min-h-[36px] px-2.5 py-1.5 rounded-xl text-xs font-semibold text-amber-900 bg-amber-100 hover:bg-amber-200 transition cursor-pointer">
+                +%/&#8369; Hike
+              </button>
+              <button type="button" onclick="openBulkModal()" class="min-h-[36px] px-2.5 py-1.5 rounded-xl text-xs font-semibold text-[#1E3A5F] bg-[#E8F0F8] hover:bg-[#dce8f5] transition cursor-pointer">
+                Bulk Paste
+              </button>
+              <button type="button" onclick="confirmResetSample()" class="min-h-[36px] px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition cursor-pointer">
+                Sample
+              </button>
+              <button type="button" onclick="confirmClearRows()" class="min-h-[36px] px-2.5 py-1.5 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50 transition cursor-pointer">
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <!-- Search Filter Bar -->
+          <div class="relative flex items-center">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input
+              type="search"
+              id="row-search-input"
+              placeholder="Search item description, unit, price, or code..."
+              oninput="handleSearchFilter(this.value)"
+              class="w-full min-h-[42px] pl-9 pr-24 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-[#1E3A5F]"
+            />
+            <span id="row-count-badge" class="absolute right-2.5 px-2 py-0.5 rounded-md bg-slate-200/80 text-slate-700 text-[10px] font-bold pointer-events-none">
+              0 items
+            </span>
+          </div>
+
+          <!-- Rows Container -->
+          <div id="rows-editor-container" class="space-y-2.5">
+          </div>
+
+          <!-- Admin Add Item & Add Section Divider Buttons -->
+          <div class="admin-only grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <button type="button" onclick="addRow(true, false)" class="sm:col-span-2 min-h-[48px] py-3 px-4 rounded-xl border-2 border-dashed border-[#2B5B9E]/40 hover:border-[#1E3A5F] hover:bg-[#E8F0F8]/50 text-[#1E3A5F] font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+              <span>Add Item Row</span>
+            </button>
+            <button type="button" onclick="addRow(true, true)" class="min-h-[48px] py-3 px-3 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer">
+              <span>+ Section Divider</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT LIVE PRINTABLE PREVIEW -->
+      <section id="preview-pane" class="hidden lg:flex flex-1 bg-slate-200/90 overflow-y-auto p-3 sm:p-8 lg:p-10 flex-col items-center">
+        <div id="paper-scale-wrapper" class="flex justify-center w-full">
+          <div id="paper-container" class="word-sheet sheet-theme-ecco paper-sheet paper-a4 bg-white shadow-xl px-6 py-8 sm:px-10 sm:py-10 transition-all">
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR (< 1024px) -->
+    <nav class="no-print lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 px-3 py-1.5 grid grid-cols-3 gap-2 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+      <button type="button" id="mobile-nav-add" onclick="handleMobilePrimaryAction()" class="min-h-[44px] rounded-xl text-xs font-bold bg-[#1E3A5F] text-white flex items-center justify-center gap-1.5 transition cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+        <span id="mobile-nav-primary-label">Add Item</span>
+      </button>
+
+      <button type="button" onclick="openFullscreenPreview()" class="min-h-[44px] rounded-xl text-xs font-bold bg-[#E8F0F8] text-[#1E3A5F] border border-[#2B5B9E]/30 flex items-center justify-center gap-1.5 transition cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+        <span>Preview</span>
+      </button>
+
+      <button type="button" onclick="window.print()" class="min-h-[44px] rounded-xl text-xs font-bold bg-slate-100 text-slate-800 hover:bg-slate-200 flex items-center justify-center gap-1.5 transition cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+        <span>Print / PDF</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. STAFF & ADMIN CREDENTIALS (SHA-256 HASHED)
+    // To generate a new password hash in your browser console, run:
+    //   ECCO_HASH("your_new_password")
+    // Default Admin: admin / ecco2026
+    // Default Sales: sales / counter2026
+    // =========================================================================
+    const AUTH_USERS = [
+      {
+        username: 'admin',
+        role: 'admin',
+        // SHA-256 of "ecco2026"
+        passwordHash: '08253a30cd3ff6bd24eb5e805018b7e3c3c9f58f6dc464a5b2ba56bfef86a65a'
+      },
+      {
+        username: 'sales',
+        role: 'sales',
+        // SHA-256 of "counter2026"
+        passwordHash: 'a3228f1a8a4b2520e3748375fc0aaeb34cf9e036e98c08340b75b3cf94f3e08b'
+      }
+    ];
+
+    const SESSION_AUTH_KEY = 'ecco_session_auth_v1';
+    let currentUser = null; // { username, role: 'admin' | 'sales' }
+
+    async function sha256Hex(text) {
+      const msgBuffer = new TextEncoder().encode(text);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Console helper so you can easily generate new password hashes
+    window.ECCO_HASH = async function(plainPassword) {
+      const h = await sha256Hex(plainPassword);
+      console.log(`Password: "${plainPassword}"\nSHA-256 Hash: ${h}`);
+      return h;
+    };
+
+    function checkExistingSession() {
+      try {
+        const raw = sessionStorage.getItem(SESSION_AUTH_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.username && parsed.role) {
+            currentUser = parsed;
+            unlockAppUI();
+            return;
+          }
+        }
+      } catch (e) {}
+      lockAppUI();
+    }
+
+    function lockAppUI() {
+      currentUser = null;
+      const gate = document.getElementById('login-gate-overlay');
+      gate.classList.remove('hidden');
+      gate.classList.add('flex');
+      document.getElementById('login-password').value = '';
+    }
+
+    function unlockAppUI() {
+      const gate = document.getElementById('login-gate-overlay');
+      gate.classList.add('hidden');
+      gate.classList.remove('flex');
+      applyRolePermissions();
+      renderRowsEditor();
+      renderPreview();
+    }
+
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const userVal = document.getElementById('login-username').value.trim().toLowerCase();
+      const passVal = document.getElementById('login-password').value;
+      const errorBox = document.getElementById('login-error-box');
+
+      const enteredHash = await sha256Hex(passVal);
+      const matched = AUTH_USERS.find(
+        u => u.username.toLowerCase() === userVal && u.passwordHash === enteredHash
+      );
+
+      if (!matched) {
+        errorBox.classList.remove('hidden');
+        return;
+      }
+
+      errorBox.classList.add('hidden');
+      currentUser = { username: matched.username, role: matched.role };
+      try {
+        sessionStorage.setItem(SESSION_AUTH_KEY, JSON.stringify(currentUser));
+      } catch (err) {}
+
+      unlockAppUI();
+      showToast(`Signed in as ${matched.username.toUpperCase()} (${matched.role.toUpperCase()})`);
+    }
+
+    function handleLogout() {
+      try {
+        sessionStorage.removeItem(SESSION_AUTH_KEY);
+      } catch (e) {}
+      if (isModalOpen) closeFullscreenPreview();
+      lockAppUI();
+      showToast('Logged out — session locked');
+    }
+
+    function toggleLoginPasswordVisibility() {
+      const inp = document.getElementById('login-password');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+
+    function isAdmin() {
+      return currentUser && currentUser.role === 'admin';
+    }
+
+    function applyRolePermissions() {
+      const admin = isAdmin();
+      const badge = document.getElementById('role-badge');
+      const mobilePrimaryLabel = document.getElementById('mobile-nav-primary-label');
+
+      if (badge) {
+        if (admin) {
+          badge.textContent = 'ADMIN';
+          badge.className = 'px-2 py-0.5 rounded-md bg-emerald-500/25 border border-emerald-300/40 text-emerald-100 text-[10px] font-extrabold uppercase tracking-wider shrink-0';
+        } else {
+          badge.textContent = 'SALES VIEW';
+          badge.className = 'px-2 py-0.5 rounded-md bg-amber-400/25 border border-amber-200/50 text-amber-100 text-[10px] font-extrabold uppercase tracking-wider shrink-0';
+        }
+      }
+
+      document.querySelectorAll('.admin-only').forEach(el => {
+        if (admin) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      if (mobilePrimaryLabel) {
+        mobilePrimaryLabel.textContent = admin ? 'Add Item' : 'Quick Check';
+      }
+
+      if (!admin) {
+        isModalEditMode = false;
+      }
+    }
+
+    function handleMobilePrimaryAction() {
+      if (isAdmin()) {
+        addRow(true, false);
+      } else {
+        if (!isQuickCheckOpen) toggleQuickCheckDrawer();
+        document.getElementById('quick-decode-input').focus();
+      }
+    }
+
+    // =========================================================================
+    // 2. HARDWARE CIPHER CODE ENGINE + AUTO ROUND-UP CENTS (132.09 -> 133)
+    // Digit Map: 1=C, 2=O, 3=Y, 4=U, 5=K, 6=H, 7=I, 8=A, 9=N, 0=X ("COYUKHIANX")
+    // =========================================================================
+    const DIGIT_CIPHER = {
+      '1': 'C', '2': 'O', '3': 'Y', '4': 'U', '5': 'K',
+      '6': 'H', '7': 'I', '8': 'A', '9': 'N', '0': 'X'
+    };
+
+    const REVERSE_CIPHER = {
+      'C': '1', 'O': '2', 'Y': '3', 'U': '4', 'K': '5',
+      'H': '6', 'I': '7', 'A': '8', 'N': '9', 'X': '0'
+    };
+
+    const LENGTH_PREFIX = { 1: 'M', 2: 'E', 3: 'B', 4: 'R', 5: 'S', 6: 'T' };
+    const PREFIX_TO_WHOLE_DIGITS = { 'M': 1, 'E': 2, 'B': 3, 'R': 4, 'S': 5, 'T': 6 };
+
+    const HARDWARE_UNITS = ['PC', 'BOX', 'KG', 'GAL', 'QT', 'LTR', 'MTR', 'LENGTH', 'PAIL', 'ROLL'];
+    const DEPARTMENTS = ['ALL', 'PAINTS', 'THINNERS', 'WIRES', 'FITTINGS', 'HOSES', 'GENERAL'];
+
+    function mapDigitsDirect(digitStr) {
+      let out = '';
+      for (const ch of digitStr) {
+        if (DIGIT_CIPHER[ch]) out += DIGIT_CIPHER[ch];
+      }
+      return out;
+    }
+
+    /**
+     * Net Price Encoder:
+     * - If roundUpCents is true (default), any decimal fraction rounds UP (Math.ceil):
+     *   e.g. 132.09 -> 133 -> BCYY | 85 -> EAK | 100 -> BCXX
+     * - If roundUpCents is false (Exact Cents), decimal digits append directly without a dot:
+     *   e.g. 1087.12 -> RCXAICO | 89.50 -> EANKX
+     */
+    function encodePriceToCipher(rawPrice, forceRoundUp = null) {
+      const cleaned = String(rawPrice ?? '').trim().replace(/,/g, '');
+      if (!cleaned) return '';
+
+      const numMatch = cleaned.match(/\d+(?:\.\d+)?/);
+      if (!numMatch) return '';
+
+      const useRoundUp = forceRoundUp !== null ? forceRoundUp : (sheet && sheet.roundUpCents !== false);
+      let numStr = numMatch[0];
+
+      if (useRoundUp) {
+        const numericVal = parseFloat(numStr);
+        if (!isNaN(numericVal)) {
+          numStr = String(Math.ceil(numericVal));
+        }
+      }
+
+      const parts = numStr.split('.');
+      const intPart = parts[0] || '';
+      const decPart = parts[1] || '';
+
+      let prefix = '';
+      if (intPart) {
+        if (LENGTH_PREFIX[intPart.length]) {
+          prefix = LENGTH_PREFIX[intPart.length];
+        } else if (intPart.length > 6) {
+          prefix = 'T'.repeat(Math.ceil(intPart.length / 6));
+        }
+      }
+
+      const encodedInt = intPart ? (prefix + mapDigitsDirect(intPart)) : '';
+      const encodedDec = decPart ? mapDigitsDirect(decPart) : '';
+
+      return encodedInt + encodedDec;
+    }
+
+    function decodeCipherToNumeric(rawCode) {
+      const code = String(rawCode ?? '').trim().toUpperCase();
+      if (!code) return null;
+
+      const firstChar = code[0];
+      let wholeLen = PREFIX_TO_WHOLE_DIGITS[firstChar] || 0;
+      let body = wholeLen > 0 ? code.slice(1) : code;
+
+      let digits = '';
+      for (const ch of body) {
+        if (REVERSE_CIPHER[ch] !== undefined) {
+          digits += REVERSE_CIPHER[ch];
+        } else if (ch === '.') {
+          digits += '.';
+        } else {
+          return null;
+        }
+      }
+
+      if (!digits) return null;
+
+      if (wholeLen > 0 && !digits.includes('.')) {
+        if (digits.length < wholeLen) return null;
+        const intStr = digits.slice(0, wholeLen);
+        const decStr = digits.slice(wholeLen);
+        const composed = decStr ? `${intStr}.${decStr}` : intStr;
+        const val = parseFloat(composed);
+        return isNaN(val) ? null : val;
+      }
+
+      const val = parseFloat(digits);
+      return isNaN(val) ? null : val;
+    }
+
+    function decodeCipherToPrice(rawCode) {
+      const val = decodeCipherToNumeric(rawCode);
+      if (val === null) return rawCode.trim() ? 'Invalid' : '';
+      return val.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    }
+
+    function encodeDiscountToCipher(rawDiscount) {
+      const str = String(rawDiscount ?? '').trim().replace(/,/g, '');
+      if (!str) return '';
+
+      const encoded = str.replace(/\d+(?:\.\d+)?/g, (match) => {
+        const parts = match.split('.');
+        const intEncoded = mapDigitsDirect(parts[0] || '');
+        const decEncoded = parts.length > 1 ? '.' + mapDigitsDirect(parts.slice(1).join('')) : '';
+        return intEncoded + decEncoded;
+      });
+
+      return encoded.toUpperCase();
+    }
+
+    // =========================================================================
+    // 3. SAMPLE DATA & PERSISTENCE
+    // =========================================================================
+    const SAMPLE_SHEET = {
+      id: 'sample-ecco-paints-wires',
+      department: 'PAINTS',
+      showSupplier: true,
+      supplierName: 'PACIFIC PAINT & INDUSTRIAL SUPPLY',
+      supplierSub: 'DEALER WHOLESALE PRICE & CIPHER CODE LIST',
+      title: 'PAINTS, THINNERS, WIRES & HOSES',
+      subtitle: 'AS OF NOVEMBER 2026',
+      showMarkupGuide: true,
+      cashMarkupLabel: 'CASH + CX%',
+      creditMarkupLabel: 'CREDIT + CK%',
+      cashMarkupPct: 10,
+      creditMarkupPct: 15,
+      roundUpCents: true,
+      showUnitCol: true,
+      footerNote: '',
+      layoutMode: 'single',
+      priceDisplay: 'both',
+      paperSize: 'a4',
+      fontSize: '15',
+      col1Header: 'ITEM DESCRIPTION',
+      colUnitHeader: 'UNIT',
+      col2Header: 'NET PRICE',
+      col3Header: 'CODE',
+      col4Header: 'DISCOUNT',
+      rows: [
+        { id: 's1', isDivider: true, desc: '--- PAINTS & THINNERS ---', unit: 'GAL', price: '', code: '', discRaw: '', discCode: '', hiked: false },
+        { id: 'r1', isDivider: false, desc: 'QUICK DRY ENAMEL WHITE', unit: 'GAL', price: '645.20', code: 'BHUK', discRaw: '10%', discCode: 'CX%', hiked: false },
+        { id: 'r2', isDivider: false, desc: 'QUICK DRY ENAMEL WHITE', unit: 'QT', price: '182.50', code: 'ECAY', discRaw: '10%', discCode: 'CX%', hiked: false },
+        { id: 'r3', isDivider: false, desc: 'LACQUER THINNER PURE', unit: 'LTR', price: '132.09', code: 'BCYY', discRaw: '5%', discCode: 'K%', hiked: true },
+        { id: 'r4', isDivider: false, desc: 'LACQUER THINNER (20L PAIL)', unit: 'PAIL', price: '2240', code: 'ROOUX', discRaw: '10/5', discCode: 'CX/K', hiked: false },
+        { id: 's2', isDivider: true, desc: '--- WIRES, FITTINGS & CHEMICAL HOSE ---', unit: 'ROLL', price: '', code: '', discRaw: '', discCode: '', hiked: false },
+        { id: 'r5', isDivider: false, desc: 'THHN STRANDED WIRE #12 (150M)', unit: 'ROLL', price: '3480', code: 'RYUAX', discRaw: '12.5%', discCode: 'CO.K%', hiked: true },
+        { id: 'r6', isDivider: false, desc: 'CHEMICAL HOSE 1/2" HEAVY DUTY', unit: 'MTR', price: '89.50', code: 'ENX', discRaw: '5%', discCode: 'K%', hiked: false },
+        { id: 'r7', isDivider: false, desc: 'GI ELBOW 1/2" SCH 40 (50 PCS)', unit: 'BOX', price: '1087.12', code: 'RCXAA', discRaw: '15%', discCode: 'CK%', hiked: false },
+        { id: 'r8', isDivider: false, desc: 'PVC PIPE 1/2" BLUE (10 FT)', unit: 'LENGTH', price: '98', code: 'ENA', discRaw: '10%', discCode: 'CX%', hiked: false }
+      ]
+    };
+
+    const STORAGE_KEY_ACTIVE = 'ecco_supplier_pricecode_active_v2';
+    const STORAGE_KEY_LIBRARY = 'ecco_supplier_pricecode_library_v2';
+    const STORAGE_KEY_THEME = 'ecco_supplier_pricecode_theme_v2';
+
+    let sheet = loadActiveSheet();
+    let savedLibrary = loadSavedLibrary();
+    let currentTheme = loadAppTheme();
+    let searchQuery = '';
+    let activeDeptFilter = 'ALL';
+
+    let isModalOpen = false;
+    let isModalEditMode = true;
+    let isModalFitZoom = true;
+    let isHeaderAccordionOpen = true;
+    let isQuickCheckOpen = false;
+    let activeCalcRow = null;
+
+    function loadAppTheme() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_THEME);
+        if (saved === 'classic' || saved === 'ecco') return saved;
+      } catch (e) {}
+      return 'ecco';
+    }
+
+    function loadActiveSheet() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_ACTIVE);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.rows)) return parsed;
+        }
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(SAMPLE_SHEET));
+    }
+
+    function loadSavedLibrary() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_LIBRARY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+      return [JSON.parse(JSON.stringify(SAMPLE_SHEET))];
+    }
+
+    function persistActiveSheet() {
+      try { localStorage.setItem(STORAGE_KEY_ACTIVE, JSON.stringify(sheet)); } catch (e) {}
+    }
+
+    function persistLibrary() {
+      try { localStorage.setItem(STORAGE_KEY_LIBRARY, JSON.stringify(savedLibrary)); } catch (e) {}
+    }
+
+    // Check URL hash for shared sheet link (#sheet=...)
+    function checkSharedUrlHash() {
+      try {
+        const hash = window.location.hash || '';
+        if (hash.startsWith('#sheet=')) {
+          const b64 = decodeURIComponent(hash.slice(7));
+          const jsonStr = decodeURIComponent(escape(atob(b64)));
+          const sharedObj = JSON.parse(jsonStr);
+          if (sharedObj && Array.isArray(sharedObj.rows)) {
+            sharedObj.id = 'shared-' + Date.now();
+            sheet = sharedObj;
+            const exists = savedLibrary.some(s => s.title === sharedObj.title && s.supplierName === sharedObj.supplierName);
+            if (!exists) {
+              savedLibrary.unshift(JSON.parse(JSON.stringify(sharedObj)));
+              persistLibrary();
+            }
+            persistActiveSheet();
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+            showToast(`Loaded shared sheet: "${sharedObj.title}"`);
+          }
+        }
+      } catch (e) {
+        console.warn('Could not parse shared sheet link:', e);
+      }
+    }
+
+    // =========================================================================
+    // 4. THEME TOGGLE (ECCO STEEL-BLUE vs CLASSIC LIGHT)
+    // =========================================================================
+    function toggleAppTheme() {
+      currentTheme = currentTheme === 'ecco' ? 'classic' : 'ecco';
+      try { localStorage.setItem(STORAGE_KEY_THEME, currentTheme); } catch (e) {}
+      applyThemeStyles();
+      renderPreview();
+      if (isModalOpen) {
+        renderModalSheet();
+        applyModalScale();
+      }
+      showToast(currentTheme === 'ecco' ? 'Switched to ECCO Steel-Blue Theme' : 'Switched to Classic Light');
+    }
+
+    function applyThemeStyles() {
+      const header = document.getElementById('top-header');
+      const badge = document.getElementById('brand-badge');
+      const title = document.getElementById('header-title');
+      const subtitle = document.getElementById('header-subtitle');
+      const themeBtn = document.getElementById('theme-toggle-btn');
+      const themeDot = document.getElementById('theme-dot');
+      const themeLabel = document.getElementById('theme-label');
+      const previewBtn = document.getElementById('header-preview-btn');
+      const saveBtn = document.getElementById('header-save-btn');
+      const printBtn = document.getElementById('header-print-btn');
+
+      if (currentTheme === 'ecco') {
+        header.className = 'no-print sticky top-0 z-30 bg-[#1E3A5F] text-white border-b border-[#142842] px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 shadow-sm transition-colors';
+        badge.className = 'w-9 h-9 rounded-xl bg-white text-[#1E3A5F] flex items-center justify-center font-extrabold text-xs tracking-wider shrink-0 shadow-2xs';
+        badge.textContent = 'ECCO';
+        title.className = 'text-sm sm:text-base font-bold text-white leading-tight truncate';
+        subtitle.className = 'text-[11px] text-sky-200/90 hidden sm:block truncate';
+        themeBtn.className = 'min-h-[40px] px-2.5 py-2 rounded-xl text-xs font-bold bg-[#142842] hover:bg-[#0f1f33] text-sky-100 border border-sky-400/30 transition flex items-center gap-1.5 cursor-pointer';
+        themeDot.className = 'w-2.5 h-2.5 rounded-full bg-sky-400 shrink-0';
+        themeLabel.textContent = 'ECCO Theme';
+        previewBtn.className = 'min-h-[40px] px-3 py-2 rounded-xl text-xs font-bold text-[#1E3A5F] bg-sky-100 hover:bg-white transition flex items-center gap-1.5 cursor-pointer';
+        saveBtn.className = 'admin-only hidden md:flex min-h-[40px] px-3 py-2 rounded-xl text-xs font-semibold text-white bg-[#2B5B9E] hover:bg-[#356cb8] transition items-center gap-1.5 cursor-pointer';
+        printBtn.className = 'min-h-[40px] px-3 py-2 rounded-xl text-xs font-bold text-[#142842] bg-white hover:bg-sky-50 transition shadow-xs flex items-center gap-1.5 cursor-pointer';
+      } else {
+        header.className = 'no-print sticky top-0 z-30 bg-white text-slate-900 border-b border-slate-200 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 shadow-2xs transition-colors';
+        badge.className = 'w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm tracking-tight shrink-0';
+        badge.textContent = 'P/C';
+        title.className = 'text-sm sm:text-base font-bold text-slate-900 leading-tight truncate';
+        subtitle.className = 'text-[11px] text-slate-500 hidden sm:block truncate';
+        themeBtn.className = 'min-h-[40px] px-2.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition flex items-center gap-1.5 cursor-pointer';
+        themeDot.className = 'w-2.5 h-2.5 rounded-full bg-slate-700 shrink-0';
+        themeLabel.textContent = 'Classic Light';
+        previewBtn.className = 'min-h-[40px] px-3 py-2 rounded-xl text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition flex items-center gap-1.5 cursor-pointer';
+        saveBtn.className = 'admin-only hidden md:flex min-h-[40px] px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition items-center gap-1.5 cursor-pointer';
+        printBtn.className = 'min-h-[40px] px-3 py-2 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 transition shadow-xs flex items-center gap-1.5 cursor-pointer';
+      }
+      applyRolePermissions();
+    }
+
+    // =========================================================================
+    // 5. QUICK CODE CHECK & COUNTER SELLING PRICE CALCULATOR POPUP
+    // =========================================================================
+    function toggleQuickCheckDrawer() {
+      isQuickCheckOpen = !isQuickCheckOpen;
+      const body = document.getElementById('quick-check-body');
+      const chevron = document.getElementById('quick-check-chevron');
+      if (isQuickCheckOpen) {
+        body.classList.remove('hidden');
+        chevron.classList.add('rotate-180');
+      } else {
+        body.classList.add('hidden');
+        chevron.classList.remove('rotate-180');
+      }
+    }
+
+    function runQuickDecode(val) {
+      const out = document.getElementById('quick-decode-output');
+      const res = decodeCipherToPrice(val);
+      out.textContent = res ? '₱' + res : '—';
+    }
+
+    function runQuickEncode(val) {
+      const out = document.getElementById('quick-encode-output');
+      const res = encodePriceToCipher(val);
+      out.textContent = res || '—';
+    }
+
+    function parseDiscountFactor(discRaw) {
+      const str = String(discRaw || '').trim();
+      if (!str) return 1;
+      const nums = str.match(/\d+(?:\.\d+)?/g);
+      if (!nums || nums.length === 0) return 1;
+      let factor = 1;
+      nums.forEach(n => {
+        const pct = parseFloat(n);
+        if (!isNaN(pct) && pct > 0 && pct < 100) {
+          factor *= (1 - pct / 100);
+        }
+      });
+      return factor;
+    }
+
+    function openCalcModalForRow(rowId) {
+      const row = sheet.rows.find(r => r.id === rowId);
+      if (!row || row.isDivider) return;
+      activeCalcRow = row;
+
+      let baseCapital = 0;
+      const rawNum = parseFloat(String(row.price || '').replace(/,/g, ''));
+      if (!isNaN(rawNum) && rawNum > 0) {
+        baseCapital = sheet.roundUpCents !== false ? Math.ceil(rawNum) : rawNum;
+      } else if (row.code) {
+        const decoded = decodeCipherToNumeric(row.code);
+        if (decoded !== null) baseCapital = decoded;
+      }
+
+      const discFactor = parseDiscountFactor(row.discRaw);
+      const netCapital = Math.ceil(baseCapital * discFactor);
+
+      const cashPct = Number(sheet.cashMarkupPct) || 10;
+      const creditPct = Number(sheet.creditMarkupPct) || 15;
+
+      const wholeCashSRP = Math.ceil(netCapital * (1 + cashPct / 100));
+      const wholeCreditSRP = Math.ceil(netCapital * (1 + creditPct / 100));
+
+      document.getElementById('calc-item-title').textContent = row.desc || 'UNNAMED ITEM';
+      document.getElementById('calc-code-val').textContent = row.code || '—';
+      document.getElementById('calc-unit-badge').textContent = `PER ${row.unit || 'PC'}`;
+      document.getElementById('calc-base-peso').textContent = `₱${baseCapital.toLocaleString('en-US')}`;
+      document.getElementById('calc-disc-label').textContent = row.discRaw ? `Less ${row.discRaw}` : 'Net Price';
+      document.getElementById('calc-net-peso').textContent = `₱${netCapital.toLocaleString('en-US')}`;
+
+      document.getElementById('calc-cash-header').textContent = `${sheet.cashMarkupLabel || 'CASH + CX%'} (${cashPct}%)`;
+      document.getElementById('calc-credit-header').textContent = `${sheet.creditMarkupLabel || 'CREDIT + CK%'} (${creditPct}%)`;
+      document.getElementById('calc-cash-price').textContent = `₱${wholeCashSRP.toLocaleString('en-US')}`;
+      document.getElementById('calc-credit-price').textContent = `₱${wholeCreditSRP.toLocaleString('en-US')}`;
+
+      // Auto-detect quantity inside parentheses e.g. "(150M)" or "(20L PAIL)"
+      const qtyMatch = String(row.desc || '').match(/\((\d+(?:\.\d+)?)\s*(?:M|MTR|L|LTR|PCS|PC)?\)/i);
+      const subInput = document.getElementById('calc-sub-qty');
+      if (qtyMatch) {
+        subInput.value = qtyMatch[1];
+      } else {
+        subInput.value = '';
+      }
+
+      activeCalcRow._computed = { netCapital, cashPct, creditPct };
+      recomputeSubUnitBreakdown();
+
+      const modal = document.getElementById('calc-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function setCalcSubPreset(val) {
+      document.getElementById('calc-sub-qty').value = val;
+      recomputeSubUnitBreakdown();
+    }
+
+    function recomputeSubUnitBreakdown() {
+      const resBox = document.getElementById('calc-sub-result');
+      if (!activeCalcRow || !activeCalcRow._computed) return;
+      const qty = parseFloat(document.getElementById('calc-sub-qty').value);
+      if (isNaN(qty) || qty <= 0) {
+        resBox.classList.add('hidden');
+        return;
+      }
+
+      const { netCapital, cashPct, creditPct } = activeCalcRow._computed;
+      const perUnitCapital = netCapital / qty;
+      const perUnitCash = Math.ceil(perUnitCapital * (1 + cashPct / 100));
+      const perUnitCredit = Math.ceil(perUnitCapital * (1 + creditPct / 100));
+
+      document.getElementById('calc-sub-cash').textContent = `₱${perUnitCash.toLocaleString('en-US')}`;
+      document.getElementById('calc-sub-credit').textContent = `₱${perUnitCredit.toLocaleString('en-US')}`;
+      resBox.classList.remove('hidden');
+    }
+
+    function closeCalcModal() {
+      const modal = document.getElementById('calc-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      activeCalcRow = null;
+    }
+
+    // =========================================================================
+    // 6. TOAST & CONFIRM HELPERS
+    // =========================================================================
+    let toastTimer = null;
+    function showToast(msg) {
+      const banner = document.getElementById('toast-banner');
+      document.getElementById('toast-message').textContent = msg;
+      banner.classList.remove('translate-y-24', 'opacity-0');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        banner.classList.add('translate-y-24', 'opacity-0');
+      }, 2400);
+    }
+
+    function openConfirmModal(title, desc, onConfirm) {
+      const modal = document.getElementById('confirm-modal');
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-desc').textContent = desc;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      const cancelBtn = document.getElementById('confirm-cancel');
+      const okBtn = document.getElementById('confirm-ok');
+
+      const close = () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        cancelBtn.onclick = null;
+        okBtn.onclick = null;
+      };
+
+      cancelBtn.onclick = close;
+      okBtn.onclick = () => {
+        close();
+        onConfirm();
+      };
+    }
+
+    // =========================================================================
+    // 7. FULL-SCREEN PREVIEW MODAL & DIRECT CLICK-TO-EDIT
+    // =========================================================================
+    function toggleHeaderAccordion() {
+      isHeaderAccordionOpen = !isHeaderAccordionOpen;
+      const body = document.getElementById('header-settings-body');
+      const chevron = document.getElementById('accordion-chevron');
+      if (isHeaderAccordionOpen) {
+        body.classList.remove('hidden');
+        chevron.classList.add('rotate-180');
+      } else {
+        body.classList.add('hidden');
+        chevron.classList.remove('rotate-180');
+      }
+    }
+
+    function openFullscreenPreview() {
+      isModalOpen = true;
+      if (!isAdmin()) isModalEditMode = false;
+
+      const modal = document.getElementById('fullscreen-preview-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+
+      syncModalButtons();
+      renderModalSheet();
+      applyModalScale();
+    }
+
+    function closeFullscreenPreview() {
+      isModalOpen = false;
+      const modal = document.getElementById('fullscreen-preview-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+
+      syncInputsFromState();
+      syncControlButtons();
+      renderRowsEditor();
+      renderPreview();
+    }
+
+    function setModalEditMode(editable) {
+      if (!isAdmin() && editable) return;
+      isModalEditMode = editable;
+      syncModalButtons();
+      renderModalSheet();
+      applyModalScale();
+    }
+
+    function toggleSafePriceMode() {
+      sheet.priceDisplay = (sheet.priceDisplay || 'both') === 'both' ? 'codeOnly' : 'both';
+      persistActiveSheet();
+      syncControlButtons();
+      syncModalButtons();
+      renderPreview();
+      renderModalSheet();
+      applyModalScale();
+      showToast(sheet.priceDisplay === 'codeOnly' ? 'Code Only (Safe Mode) active' : 'Showing Net Price + Code');
+    }
+
+    function toggleLayoutMode() {
+      sheet.layoutMode = (sheet.layoutMode || 'single') === 'single' ? 'dual' : 'single';
+      persistActiveSheet();
+      syncControlButtons();
+      syncModalButtons();
+      renderPreview();
+      renderModalSheet();
+      applyModalScale();
+    }
+
+    function toggleModalZoom() {
+      isModalFitZoom = !isModalFitZoom;
+      syncModalButtons();
+      applyModalScale();
+    }
+
+    function applyModalScale() {
+      const container = document.getElementById('modal-paper-container');
+      const outer = document.getElementById('modal-scale-outer');
+      if (!container || !outer) return;
+
+      container.style.transform = '';
+      outer.style.height = '';
+      outer.style.width = '';
+
+      if (!isModalFitZoom) return;
+
+      const viewportW = window.innerWidth;
+      const padding = viewportW < 640 ? 24 : 64;
+      const availableW = viewportW - padding;
+      const naturalW = container.offsetWidth || 794;
+
+      if (availableW < naturalW) {
+        const scale = Math.max(0.42, availableW / naturalW);
+        container.style.transform = `scale(${scale})`;
+        outer.style.width = Math.round(naturalW * scale) + 'px';
+        outer.style.height = Math.round(container.offsetHeight * scale) + 'px';
+      }
+    }
+
+    function syncModalButtons() {
+      const editSwitchGroup = document.getElementById('modal-edit-switch-group');
+      const editBtn = document.getElementById('modal-mode-edit');
+      const cleanBtn = document.getElementById('modal-mode-clean');
+      const hintEl = document.getElementById('modal-edit-hint');
+      const mobileTip = document.getElementById('modal-mobile-tip');
+      const safeBtn = document.getElementById('modal-toggle-safe');
+      const layoutBtn = document.getElementById('modal-toggle-layout');
+      const zoomBtn = document.getElementById('modal-toggle-zoom');
+      const paperEl = document.getElementById('modal-paper-container');
+
+      if (!isAdmin()) {
+        if (editSwitchGroup) editSwitchGroup.classList.add('hidden');
+        if (hintEl) hintEl.textContent = 'Sales Counter View-Only Preview';
+        if (mobileTip) mobileTip.classList.add('hidden');
+        if (paperEl) paperEl.classList.remove('preview-editable-mode');
+      } else {
+        if (editSwitchGroup) editSwitchGroup.classList.remove('hidden');
+        if (isModalEditMode) {
+          editBtn.className = 'min-h-[36px] px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#1E3A5F] text-white shadow-2xs transition cursor-pointer flex items-center gap-1';
+          cleanBtn.className = 'min-h-[36px] px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-600 hover:text-slate-900 transition cursor-pointer';
+          if (hintEl) hintEl.textContent = 'Tap any text or price inside the sheet below to edit directly';
+          if (mobileTip) mobileTip.classList.remove('hidden');
+          if (paperEl) paperEl.classList.add('preview-editable-mode');
+        } else {
+          cleanBtn.className = 'min-h-[36px] px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-900 text-white shadow-2xs transition cursor-pointer';
+          editBtn.className = 'min-h-[36px] px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-600 hover:text-slate-900 transition cursor-pointer flex items-center gap-1';
+          if (hintEl) hintEl.textContent = 'Clean Print View — exact paper output';
+          if (mobileTip) mobileTip.classList.add('hidden');
+          if (paperEl) paperEl.classList.remove('preview-editable-mode');
+        }
+      }
+
+      if (safeBtn) {
+        const isSafe = (sheet.priceDisplay || 'both') === 'codeOnly';
+        safeBtn.textContent = isSafe ? 'Code Only (Safe)' : 'Price + Code';
+        safeBtn.className = isSafe
+          ? 'min-h-[36px] px-2.5 py-1 rounded-xl text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300 transition cursor-pointer'
+          : 'min-h-[36px] px-2.5 py-1 rounded-xl text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition cursor-pointer';
+      }
+
+      if (layoutBtn) {
+        layoutBtn.textContent = (sheet.layoutMode || 'single') === 'dual' ? 'Dual Split' : 'Full Width';
+      }
+
+      if (zoomBtn) {
+        zoomBtn.textContent = isModalFitZoom ? '100% Zoom' : 'Fit Screen';
+      }
+    }
+
+    function addRowInPreview() {
+      if (!isAdmin()) return;
+      addRow(false, false);
+      renderModalSheet();
+      applyModalScale();
+      showToast('Added new row to sheet');
+    }
+
+    function triggerPrintFromModal() {
+      renderPreview();
+      window.print();
+    }
+
+    function handleDirectPreviewBlur(el) {
+      if (!isAdmin()) return;
+      const editType = el.dataset.editable;
+      const newVal = el.innerText.replace(/\u00A0/g, ' ').trim();
+
+      if (editType === 'supplierName') { sheet.supplierName = newVal; persistActiveSheet(); syncInputsFromState(); renderPreview(); return; }
+      if (editType === 'supplierSub') { sheet.supplierSub = newVal; persistActiveSheet(); syncInputsFromState(); renderPreview(); return; }
+      if (editType === 'title') { sheet.title = newVal; persistActiveSheet(); syncInputsFromState(); renderPreview(); return; }
+      if (editType === 'subtitle') { sheet.subtitle = newVal; persistActiveSheet(); syncInputsFromState(); renderPreview(); return; }
+      if (editType === 'cashMarkupLabel') { sheet.cashMarkupLabel = newVal; persistActiveSheet(); syncInputsFromState(); renderPreview(); return; }
+      if (editType === 'creditMarkupLabel') { sheet.creditMarkupLabel = newVal; persistActiveSheet(); syncInputsFromState(); renderPreview(); return; }
+
+      const rowId = el.dataset.rowId;
+      if (!rowId) return;
+      const row = sheet.rows.find(r => r.id === rowId);
+      if (!row) return;
+
+      if (editType === 'desc') {
+        row.desc = newVal;
+      } else if (editType === 'unit') {
+        row.unit = newVal.toUpperCase();
+      } else if (editType === 'price') {
+        row.price = newVal;
+        row.code = encodePriceToCipher(newVal);
+      } else if (editType === 'code') {
+        row.code = newVal.toUpperCase();
+      } else if (editType === 'discCode') {
+        if (/\d/.test(newVal)) {
+          row.discRaw = newVal;
+          row.discCode = encodeDiscountToCipher(newVal);
+        } else {
+          row.discCode = newVal.toUpperCase();
+        }
+      }
+
+      persistActiveSheet();
+      renderRowsEditor();
+      renderPreview();
+      renderModalSheet();
+      applyModalScale();
+    }
+
+    function handleDirectPreviewKeydown(e, el) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        el.blur();
+      }
+    }
+
+    // =========================================================================
+    // 8. META, ROUND-UP CENTS, BULK HIKE & ROW MUTATIONS
+    // =========================================================================
+    function updateMeta(key, value) {
+      if (!isAdmin()) return;
+      sheet[key] = value;
+      persistActiveSheet();
+      syncControlButtons();
+      renderSavedSheetsDropdown();
+      renderPreview();
+      if (isModalOpen) {
+        renderModalSheet();
+        applyModalScale();
+      }
+    }
+
+    function stampTodayDate() {
+      if (!isAdmin()) return;
+      const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+      const now = new Date();
+      const formatted = `AS OF ${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+      document.getElementById('input-subtitle').value = formatted;
+      updateMeta('subtitle', formatted);
+      showToast(`Updated date: ${formatted}`);
+    }
+
+    function toggleRoundUpCents(enabled) {
+      if (!isAdmin()) return;
+      sheet.roundUpCents = enabled;
+      sheet.rows.forEach(r => {
+        if (!r.isDivider && r.price) {
+          r.code = encodePriceToCipher(r.price, enabled);
+        }
+      });
+      persistActiveSheet();
+      renderRowsEditor();
+      renderPreview();
+      showToast(enabled ? 'Auto Round-Up Cents ON (132.09 → 133)' : 'Exact Cents Mode ON');
+    }
+
+    function syncInputsFromState() {
+      document.getElementById('check-show-supplier').checked = sheet.showSupplier !== false;
+      document.getElementById('input-department').value = sheet.department || 'GENERAL';
+      document.getElementById('input-supplier').value = sheet.supplierName || '';
+      document.getElementById('input-supplier-sub').value = sheet.supplierSub || '';
+      document.getElementById('input-title').value = sheet.title || '';
+      document.getElementById('input-subtitle').value = sheet.subtitle || '';
+      document.getElementById('check-show-markup').checked = sheet.showMarkupGuide !== false;
+      document.getElementById('input-cash-label').value = sheet.cashMarkupLabel || 'CASH + CX%';
+      document.getElementById('input-credit-label').value = sheet.creditMarkupLabel || 'CREDIT + CK%';
+      document.getElementById('input-cash-pct').value = sheet.cashMarkupPct ?? 10;
+      document.getElementById('input-credit-pct').value = sheet.creditMarkupPct ?? 15;
+      document.getElementById('check-round-up').checked = sheet.roundUpCents !== false;
+      document.getElementById('check-show-unit').checked = sheet.showUnitCol !== false;
+    }
+
+    function syncControlButtons() {
+      const supGroup = document.getElementById('supplier-inputs-group');
+      if (supGroup) supGroup.style.opacity = sheet.showSupplier !== false ? '1' : '0.45';
+
+      const activeBtnClass = 'bg-[#1E3A5F] text-white shadow-2xs';
+      const inactiveBtnClass = 'text-slate-600 hover:text-slate-900';
+
+      document.querySelectorAll('.layout-btn').forEach(btn => {
+        const active = btn.dataset.layoutBtn === (sheet.layoutMode || 'single');
+        btn.className = `layout-btn min-h-[36px] py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${active ? activeBtnClass : inactiveBtnClass}`;
+      });
+
+      document.querySelectorAll('.paper-btn').forEach(btn => {
+        const active = btn.dataset.paperBtn === (sheet.paperSize || 'a4');
+        btn.className = `paper-btn min-h-[36px] py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${active ? activeBtnClass : inactiveBtnClass}`;
+      });
+
+      document.querySelectorAll('.font-btn').forEach(btn => {
+        const active = btn.dataset.fontBtn === String(sheet.fontSize || '15');
+        btn.className = `font-btn min-h-[36px] py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${active ? activeBtnClass : inactiveBtnClass}`;
+      });
+
+      document.querySelectorAll('.pdisp-btn').forEach(btn => {
+        const active = btn.dataset.pdispBtn === (sheet.priceDisplay || 'both');
+        btn.className = `pdisp-btn min-h-[36px] py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${active ? activeBtnClass : inactiveBtnClass}`;
+      });
+    }
+
+    function updateRowField(rowId, field, value) {
+      if (!isAdmin()) return;
+      const row = sheet.rows.find(r => r.id === rowId);
+      if (!row) return;
+
+      row[field] = value;
+
+      if (field === 'price') {
+        row.code = encodePriceToCipher(value);
+        const codeInput = document.getElementById(`code-${rowId}`);
+        if (codeInput) codeInput.value = row.code;
+      } else if (field === 'discRaw') {
+        row.discCode = encodeDiscountToCipher(value);
+        const discCodeInput = document.getElementById(`disccode-${rowId}`);
+        if (discCodeInput) discCodeInput.value = row.discCode;
+      }
+
+      persistActiveSheet();
+      renderPreview();
+    }
+
+    function toggleRowHike(rowId) {
+      if (!isAdmin()) return;
+      const row = sheet.rows.find(r => r.id === rowId);
+      if (!row || row.isDivider) return;
+      row.hiked = !row.hiked;
+      persistActiveSheet();
+      renderRowsEditor();
+      renderPreview();
+    }
+
+    function addRow(focusNew = false, isDivider = false) {
+      if (!isAdmin()) return;
+      const newId = 'r-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+      sheet.rows.push({
+        id: newId,
+        isDivider: !!isDivider,
+        desc: isDivider ? '--- NEW SECTION ---' : '',
+        unit: 'PC',
+        price: '',
+        code: '',
+        discRaw: '',
+        discCode: '',
+        hiked: false
+      });
+      if (searchQuery) {
+        searchQuery = '';
+        const searchInput = document.getElementById('row-search-input');
+        if (searchInput) searchInput.value = '';
+      }
+      persistActiveSheet();
+      renderRowsEditor();
+      renderPreview();
+      if (focusNew) {
+        setTimeout(() => {
+          const el = document.getElementById(`desc-${newId}`);
+          if (el) {
+            el.focus();
+            if (isDivider) el.select();
+          }
+        }, 20);
+      }
+    }
+
+    function deleteRow(rowId) {
+      if (!isAdmin()) return;
+      sheet.rows = sheet.rows.filter(r => r.id !== rowId);
+      persistActiveSheet();
+      renderRowsEditor();
+      renderPreview();
+    }
+
+    function moveRow(index, direction) {
+      if (!isAdmin()) return;
+      const target = index + direction;
+      if (target < 0 || target >= sheet.rows.length) return;
+      const temp = sheet.rows[index];
+      sheet.rows[index] = sheet.rows[target];
+      sheet.rows[target] = temp;
+      persistActiveSheet();
+      renderRowsEditor();
+      renderPreview();
+    }
+
+    function handleRowEnterKey(e, idx) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (idx === sheet.rows.length - 1) {
+          addRow(true, false);
+        } else {
+          const nextRow = sheet.rows[idx + 1];
+          const nextEl = document.getElementById(`desc-${nextRow.id}`);
+          if (nextEl) nextEl.focus();
+        }
+      }
+    }
+
+    function handleSearchFilter(val) {
+      searchQuery = String(val || '').trim().toLowerCase();
+      renderRowsEditor();
+    }
+
+    // Bulk Price Adjustment (+% or +Peso)
+    function openBulkAdjustModal() {
+      if (!isAdmin()) return;
+      const m = document.getElementById('bulk-adjust-modal');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+      document.getElementById('bulk-adj-value').focus();
+    }
+
+    function closeBulkAdjustModal() {
+      const m = document.getElementById('bulk-adjust-modal');
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+
+    function quickSetBulkAdj(type, val) {
+      document.getElementById('bulk-adj-type').value = type;
+      document.getElementById('bulk-adj-value').value = val;
+    }
+
+    function applyBulkPriceAdjustment() {
+      if (!isAdmin()) return;
+      const type = document.getElementById('bulk-adj-type').value;
+      const val = parseFloat(document.getElementById('bulk-adj-value').value);
+      const flagHike = document.getElementById('bulk-adj-flag').checked;
+
+      if (isNaN(val) || val === 0) {
+        showToast('Enter a valid percentage or peso amount');
+        return;
+      }
+
+      let updatedCount = 0;
+      sheet.rows.forEach(r => {
+        if (r.isDivider) return;
+        const curr = parseFloat(String(r.price || '').replace(/,/g, ''));
+        if (!isNaN(curr) && curr > 0) {
+          let nextVal = type === 'percent' ? curr * (1 + val / 100) : curr + val;
+          if (nextVal < 1) nextVal = 1;
+          const rounded = sheet.roundUpCents !== false ? Math.ceil(nextVal) : Number(nextVal.toFixed(2));
+          r.price = String(rounded);
+          r.code = encodePriceToCipher(r.price);
+          if (flagHike && val > 0) r.hiked = true;
+          updatedCount++;
+        }
+      });
+
+      persistActiveSheet();
+      renderRowsEditor();
+      renderPreview();
+      closeBulkAdjustModal();
+      showToast(`Updated ${updatedCount} item prices & re-encoded ciphers`);
+    }
+
+    function confirmResetSample() {
+      if (!isAdmin()) return;
+      openConfirmModal(
+        'Load Sample Paints, Wires & Hose List?',
+        'Replace current rows with the sample ECCO Paints, Thinners, Wires & Hoses price list?',
+        () => {
+          const currentId = sheet.id;
+          sheet = JSON.parse(JSON.stringify(SAMPLE_SHEET));
+          sheet.id = currentId || SAMPLE_SHEET.id;
+          searchQuery = '';
+          const searchInput = document.getElementById('row-search-input');
+          if (searchInput) searchInput.value = '';
+          persistActiveSheet();
+          syncInputsFromState();
+          syncControlButtons();
+          renderRowsEditor();
+          renderPreview();
+          showToast('Sample price list loaded');
+        }
+      );
+    }
+
+    function confirmClearRows() {
+      if (!isAdmin()) return;
+      openConfirmModal(
+        'Clear All Rows?',
+        'Remove all items from this sheet?',
+        () => {
+          sheet.rows = [];
+          searchQuery = '';
+          const searchInput = document.getElementById('row-search-input');
+          if (searchInput) searchInput.value = '';
+          persistActiveSheet();
+          renderRowsEditor();
+          renderPreview();
+          showToast('All rows cleared');
+        }
+      );
+    }
+
+    // =========================================================================
+    // 9. BULK PASTE MODAL
+    // =========================================================================
+    function openBulkModal() {
+      if (!isAdmin()) return;
+      const modal = document.getElementById('bulk-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.getElementById('bulk-textarea').focus();
+    }
+
+    function closeBulkModal() {
+      const modal = document.getElementById('bulk-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function processBulkPaste() {
+      if (!isAdmin()) return;
+      const text = document.getElementById('bulk-textarea').value;
+      const replace = document.getElementById('bulk-replace-check').checked;
+      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+
+      if (lines.length === 0) {
+        showToast('Paste at least one item line first');
+        return;
+      }
+
+      const parsedRows = lines.map((line, i) => {
+        if (line.startsWith('---') && line.endsWith('---')) {
+          return {
+            id: 'bulk-div-' + Date.now() + '-' + i,
+            isDivider: true,
+            desc: line.toUpperCase(),
+            unit: 'PC',
+            price: '',
+            code: '',
+            discRaw: '',
+            discCode: '',
+            hiked: false
+          };
+        }
+
+        const parts = line.split(/\t|,|\|/).map(p => p.trim());
+        const desc = parts[0] || '';
+        const price = parts[1] || '';
+        const discRaw = parts[2] || '';
+        const rawUnit = (parts[3] || 'PC').toUpperCase();
+        const unit = HARDWARE_UNITS.includes(rawUnit) ? rawUnit : 'PC';
+
+        return {
+          id: 'bulk-' + Date.now() + '-' + i,
+          isDivider: false,
+          desc,
+          unit,
+          price,
+          code: encodePriceToCipher(price),
+          discRaw,
+          discCode: encodeDiscountToCipher(discRaw),
+          hiked: false
+        };
+      });
+
+      sheet.rows = replace ? parsedRows : [...sheet.rows, ...parsedRows];
+      searchQuery = '';
+      const searchInput = document.getElementById('row-search-input');
+      if (searchInput) searchInput.value = '';
+      persistActiveSheet();
+      renderRowsEditor();
+      renderPreview();
+      closeBulkModal();
+      showToast(`Generated ${parsedRows.length} rows`);
+    }
+
+    // =========================================================================
+    // 10. SAVED SUPPLIER SHEETS LIBRARY, DEPARTMENT PILLS, SHARE QR, JSON/CSV
+    // =========================================================================
+    function setDeptFilter(dept) {
+      activeDeptFilter = dept;
+      renderSavedSheetsDropdown();
+    }
+
+    function renderSavedSheetsDropdown() {
+      const pillsContainer = document.getElementById('dept-filter-pills');
+      if (pillsContainer) {
+        pillsContainer.innerHTML = DEPARTMENTS.map(dept => {
+          const active = activeDeptFilter === dept;
+          const cls = active
+            ? 'bg-[#1E3A5F] text-white font-bold shadow-2xs'
+            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 font-semibold';
+          return `<button type="button" onclick="setDeptFilter('${dept}')" class="px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider shrink-0 transition cursor-pointer ${cls}">${dept}</button>`;
+        }).join('');
+      }
+
+      const select = document.getElementById('saved-sheets-select');
+      const filtered = activeDeptFilter === 'ALL'
+        ? savedLibrary
+        : savedLibrary.filter(s => (s.department || 'GENERAL') === activeDeptFilter);
+
+      const listToShow = filtered.length > 0 ? filtered : savedLibrary;
+
+      select.innerHTML = listToShow.map(item => {
+        const deptTag = item.department ? `[${item.department}] ` : '';
+        const sup = (item.supplierName || '').trim();
+        const title = (item.title || 'Untitled Sheet').trim();
+        const label = deptTag + (sup ? `${sup} — ${title}` : title);
+        const selected = item.id === sheet.id ? 'selected' : '';
+        return `<option value="${escapeHtml(item.id)}" ${selected}>${escapeHtml(label)}</option>`;
+      }).join('');
+    }
+
+    function saveCurrentSheet() {
+      if (!isAdmin()) return;
+      if (!sheet.id) sheet.id = 'sheet-' + Date.now();
+      const copy = JSON.parse(JSON.stringify(sheet));
+      const existingIdx = savedLibrary.findIndex(s => s.id === sheet.id);
+      if (existingIdx >= 0) {
+        savedLibrary[existingIdx] = copy;
+      } else {
+        savedLibrary.unshift(copy);
+      }
+      persistActiveSheet();
+      persistLibrary();
+      renderSavedSheetsDropdown();
+      showToast(`Saved "${sheet.supplierName || sheet.title || 'Supplier Sheet'}"`);
+    }
+
+    function loadSavedSheet(id) {
+      const found = savedLibrary.find(s => s.id === id);
+      if (!found) return;
+      sheet = JSON.parse(JSON.stringify(found));
+      searchQuery = '';
+      const searchInput = document.getElementById('row-search-input');
+      if (searchInput) searchInput.value = '';
+      persistActiveSheet();
+      syncInputsFromState();
+      syncControlButtons();
+      renderRowsEditor();
+      renderPreview();
+      showToast(`Loaded "${sheet.supplierName || sheet.title || 'Sheet'}"`);
+    }
+
+    function createNewBlankSheet() {
+      if (!isAdmin()) return;
+      sheet = {
+        id: 'sheet-' + Date.now(),
+        department: activeDeptFilter !== 'ALL' ? activeDeptFilter : 'PAINTS',
+        showSupplier: true,
+        supplierName: 'SUPPLIER COMPANY NAME',
+        supplierSub: 'DEALER PRICE & CIPHER LIST',
+        title: 'NEW SUPPLIER PRICE LIST',
+        subtitle: 'AS OF NOVEMBER 2026',
+        showMarkupGuide: true,
+        cashMarkupLabel: 'CASH + CX%',
+        creditMarkupLabel: 'CREDIT + CK%',
+        cashMarkupPct: 10,
+        creditMarkupPct: 15,
+        roundUpCents: true,
+        showUnitCol: true,
+        footerNote: '',
+        layoutMode: sheet.layoutMode || 'single',
+        priceDisplay: sheet.priceDisplay || 'both',
+        paperSize: sheet.paperSize || 'a4',
+        fontSize: sheet.fontSize || '15',
+        col1Header: 'ITEM DESCRIPTION',
+        colUnitHeader: 'UNIT',
+        col2Header: 'NET PRICE',
+        col3Header: 'CODE',
+        col4Header: 'DISCOUNT',
+        rows: [
+          { id: 'r-' + Date.now() + '-1', isDivider: false, desc: '', unit: 'PC', price: '', code: '', discRaw: '', discCode: '', hiked: false },
+          { id: 'r-' + Date.now() + '-2', isDivider: false, desc: '', unit: 'PC', price: '', code: '', discRaw: '', discCode: '', hiked: false },
+          { id: 'r-' + Date.now() + '-3', isDivider: false, desc: '', unit: 'PC', price: '', code: '', discRaw: '', discCode: '', hiked: false }
+        ]
+      };
+      savedLibrary.unshift(JSON.parse(JSON.stringify(sheet)));
+      persistActiveSheet();
+      persistLibrary();
+      renderSavedSheetsDropdown();
+      syncInputsFromState();
+      syncControlButtons();
+      renderRowsEditor();
+      renderPreview();
+      showToast('Created new supplier sheet');
+    }
+
+    function duplicateCurrentSheet() {
+      if (!isAdmin()) return;
+      const copy = JSON.parse(JSON.stringify(sheet));
+      copy.id = 'sheet-' + Date.now();
+      copy.title = (copy.title || 'PRICE LIST') + ' (COPY)';
+      sheet = copy;
+      savedLibrary.unshift(JSON.parse(JSON.stringify(sheet)));
+      persistActiveSheet();
+      persistLibrary();
+      renderSavedSheetsDropdown();
+      syncInputsFromState();
+      syncControlButtons();
+      renderRowsEditor();
+      renderPreview();
+      showToast('Duplicated current supplier sheet');
+    }
+
+    function confirmDeleteSavedSheet() {
+      if (!isAdmin()) return;
+      if (savedLibrary.length <= 1) {
+        showToast('At least one saved sheet must remain');
+        return;
+      }
+      openConfirmModal(
+        'Delete Saved Supplier Sheet?',
+        `Remove "${sheet.supplierName || sheet.title || 'Untitled Sheet'}" from your saved sheets?`,
+        () => {
+          savedLibrary = savedLibrary.filter(s => s.id !== sheet.id);
+          persistLibrary();
+          sheet = JSON.parse(JSON.stringify(savedLibrary[0]));
+          persistActiveSheet();
+          renderSavedSheetsDropdown();
+          syncInputsFromState();
+          syncControlButtons();
+          renderRowsEditor();
+          renderPreview();
+          showToast('Saved sheet deleted');
+        }
+      );
+    }
+
+    // Shareable Link & QR Code Modal
+    function openShareModal() {
+      try {
+        const compactPayload = JSON.stringify(sheet);
+        const b64 = btoa(unescape(encodeURIComponent(compactPayload)));
+        const baseUrl = window.location.href.split('#')[0];
+        const shareUrl = `${baseUrl}#sheet=${encodeURIComponent(b64)}`;
+
+        document.getElementById('share-url-input').value = shareUrl;
+        const qrImg = document.getElementById('share-qr-img');
+        qrImg.style.display = 'block';
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareUrl)}`;
+
+        const m = document.getElementById('share-modal');
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+      } catch (e) {
+        showToast('Sheet too large for link — use Export JSON instead');
+      }
+    }
+
+    function closeShareModal() {
+      const m = document.getElementById('share-modal');
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+
+    function copyShareUrl() {
+      const inp = document.getElementById('share-url-input');
+      inp.select();
+      inp.setSelectionRange(0, 99999);
+      document.execCommand('copy');
+      showToast('Shareable sheet link copied!');
+    }
+
+    function exportAllSheetsJson() {
+      if (isAdmin()) saveCurrentSheet();
+      const payload = {
+        app: 'ECCO Supplier Price List & Cipher Code Generator',
+        exportedAt: new Date().toISOString(),
+        sheets: savedLibrary
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ecco-pricelists-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Exported ${savedLibrary.length} sheet(s) to JSON`);
+    }
+
+    function triggerImportBackup() {
+      if (!isAdmin()) return;
+      const input = document.getElementById('json-import-input');
+      input.value = '';
+      input.click();
+    }
+
+    function handleImportBackupFile(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          const incoming = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.sheets) ? parsed.sheets : null);
+          if (!incoming || incoming.length === 0) {
+            showToast('No valid supplier sheets found in file');
+            return;
+          }
+
+          let importedCount = 0;
+          incoming.forEach(item => {
+            if (item && Array.isArray(item.rows)) {
+              const id = item.id || ('imp-' + Date.now() + '-' + importedCount);
+              item.id = id;
+              const idx = savedLibrary.findIndex(s => s.id === id);
+              if (idx >= 0) savedLibrary[idx] = item;
+              else savedLibrary.unshift(item);
+              importedCount++;
+            }
+          });
+
+          if (importedCount > 0) {
+            sheet = JSON.parse(JSON.stringify(savedLibrary[0]));
+            persistActiveSheet();
+            persistLibrary();
+            renderSavedSheetsDropdown();
+            syncInputsFromState();
+            syncControlButtons();
+            renderRowsEditor();
+            renderPreview();
+            showToast(`Restored ${importedCount} supplier sheet(s)`);
+          }
+        } catch (err) {
+          showToast('Invalid JSON backup file');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function exportCurrentSheetCsv() {
+      const escapeCsv = (val) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+      const headers = ['Item Description', 'Unit', 'Net Price', 'Price Code', 'Discount', 'Discount Code'];
+      const lines = [
+        escapeCsv(sheet.supplierName || ''),
+        escapeCsv(sheet.title || ''),
+        headers.map(escapeCsv).join(',')
+      ];
+
+      sheet.rows.forEach(r => {
+        if (r.isDivider) {
+          lines.push(escapeCsv(r.desc || '--- SECTION ---'));
+        } else {
+          lines.push([r.desc, r.unit || 'PC', r.price, r.code, r.discRaw, r.discCode].map(escapeCsv).join(','));
+        }
+      });
+
+      const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safeName = (sheet.title || 'pricelist').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      a.href = url;
+      a.download = `${safeName}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Exported current sheet to CSV');
+    }
+
+    // =========================================================================
+    // 11. RENDER ITEMS EDITOR / COUNTER LIST (ROLE-AWARE)
+    // =========================================================================
+    function renderRowsEditor() {
+      const container = document.getElementById('rows-editor-container');
+      const countBadge = document.getElementById('row-count-badge');
+      const admin = isAdmin();
+
+      const filteredRows = searchQuery
+        ? sheet.rows.filter(r =>
+            (r.desc || '').toLowerCase().includes(searchQuery) ||
+            (r.unit || '').toLowerCase().includes(searchQuery) ||
+            (r.price || '').toLowerCase().includes(searchQuery) ||
+            (r.code || '').toLowerCase().includes(searchQuery) ||
+            (r.discRaw || '').toLowerCase().includes(searchQuery) ||
+            (r.discCode || '').toLowerCase().includes(searchQuery)
+          )
+        : sheet.rows;
+
+      const itemOnlyCount = sheet.rows.filter(r => !r.isDivider).length;
+      if (countBadge) {
+        countBadge.textContent = searchQuery
+          ? `${filteredRows.length} match`
+          : `${itemOnlyCount} item${itemOnlyCount === 1 ? '' : 's'}`;
+      }
+
+      if (sheet.rows.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 border-2 border-dashed border-slate-200 rounded-xl text-xs text-slate-400">
+            No items yet. ${admin ? 'Click "Add Item Row" below or use "Bulk Paste".' : 'Ask Admin to add items.'}
+          </div>
+        `;
+        return;
+      }
+
+      if (filteredRows.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 border border-slate-200 bg-slate-50 rounded-xl text-xs text-slate-500">
+            No items match "<b>${escapeHtml(searchQuery)}</b>".
+          </div>
+        `;
+        return;
+      }
+
+      // SALES COUNTER VIEW-ONLY MODE (Tap-to-Calculate Cards)
+      if (!admin) {
+        container.innerHTML = filteredRows.map(row => {
+          if (row.isDivider) {
+            return `
+              <div class="bg-[#1E3A5F] text-white px-3.5 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider">
+                ${escapeHtml(row.desc || 'SECTION')}
+              </div>
+            `;
+          }
+          return `
+            <div onclick="openCalcModalForRow('${row.id}')" class="bg-slate-50 hover:bg-[#E8F0F8]/60 border border-slate-200 rounded-2xl p-3 flex items-center justify-between gap-2 cursor-pointer transition active:scale-[0.99]">
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5">
+                  ${row.hiked ? '<span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px] font-extrabold">&#9650; NEW</span>' : ''}
+                  <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(row.desc || 'Unnamed Item')}</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 mt-1 text-[11px] font-mono">
+                  <span class="px-2 py-0.5 rounded bg-slate-200 text-slate-800 font-bold">${escapeHtml(row.unit || 'PC')}</span>
+                  <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-950 font-extrabold">CODE: ${escapeHtml(row.code || '—')}</span>
+                  ${row.discCode ? `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-bold">DISC: ${escapeHtml(row.discCode)}</span>` : ''}
+                </div>
+              </div>
+              <button type="button" class="min-h-[42px] px-3 py-2 rounded-xl bg-[#1E3A5F] text-white text-xs font-bold shrink-0 shadow-2xs">
+                Calc SRP
+              </button>
+            </div>
+          `;
+        }).join('');
+        return;
+      }
+
+      // ADMIN FULL EDITOR MODE
+      const rowsHtml = filteredRows.map((row) => {
+        const realIdx = sheet.rows.findIndex(r => r.id === row.id);
+
+        if (row.isDivider) {
+          return `
+            <div class="bg-[#1E3A5F]/10 border border-[#1E3A5F]/30 rounded-xl p-2.5 flex items-center gap-2">
+              <span class="px-2 py-1 rounded bg-[#1E3A5F] text-white text-[10px] font-extrabold uppercase shrink-0">Section</span>
+              <input
+                id="desc-${row.id}"
+                type="text"
+                value="${escapeHtml(row.desc || '')}"
+                placeholder="--- SECTION HEADER ---"
+                oninput="updateRowField('${row.id}', 'desc', this.value)"
+                onkeydown="handleRowEnterKey(event, ${realIdx})"
+                class="flex-1 min-h-[38px] px-2.5 py-1 text-xs font-extrabold uppercase bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#1E3A5F]"
+              />
+              <button type="button" onclick="moveRow(${realIdx}, -1)" ${realIdx === 0 ? 'disabled' : ''} class="p-1.5 text-slate-600 hover:text-slate-900 disabled:opacity-30 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/></svg>
+              </button>
+              <button type="button" onclick="deleteRow('${row.id}')" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+          `;
+        }
+
+        const unitOptions = HARDWARE_UNITS.map(u =>
+          `<option value="${u}" ${(row.unit || 'PC') === u ? 'selected' : ''}>${u}</option>`
+        ).join('');
+
+        return `
+          <div class="bg-slate-50 border ${row.hiked ? 'border-amber-400 bg-amber-50/30' : 'border-slate-200'} rounded-2xl p-2.5 sm:p-3 hover:border-[#2B5B9E]/40 transition space-y-2">
+            <!-- Top Row: Item # + Description + Hike Flag + Calc + Move/Delete -->
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] font-extrabold text-[#1E3A5F] bg-[#E8F0F8] px-2 py-1 rounded-md shrink-0">#${realIdx + 1}</span>
+              <input
+                id="desc-${row.id}"
+                type="text"
+                value="${escapeHtml(row.desc || '')}"
+                placeholder="Item Description (e.g. BOYSEN ENAMEL WHITE)"
+                oninput="updateRowField('${row.id}', 'desc', this.value)"
+                onkeydown="handleRowEnterKey(event, ${realIdx})"
+                class="flex-1 min-w-0 min-h-[40px] px-2.5 py-1.5 text-xs font-semibold bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A5F]"
+              />
+              <button type="button" onclick="toggleRowHike('${row.id}')" title="Toggle Price Increase Marker (▲)" class="min-h-[38px] px-2 rounded-lg text-[11px] font-extrabold border transition cursor-pointer ${row.hiked ? 'bg-amber-400 text-slate-950 border-amber-500' : 'bg-white text-slate-400 border-slate-200 hover:text-slate-700'}">
+                &#9650;
+              </button>
+              <button type="button" onclick="openCalcModalForRow('${row.id}')" title="Calculate Cash/Credit Retail SRP" class="min-h-[38px] px-2.5 rounded-lg text-[11px] font-bold bg-[#1E3A5F] hover:bg-[#142842] text-white transition cursor-pointer shrink-0">
+                Calc
+              </button>
+              <button type="button" onclick="moveRow(${realIdx}, -1)" ${realIdx === 0 ? 'disabled' : ''} title="Move Up" class="hidden sm:flex p-1 text-slate-400 hover:text-slate-800 disabled:opacity-25 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/></svg>
+              </button>
+              <button type="button" onclick="deleteRow('${row.id}')" title="Delete Row" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <!-- Bottom Grid: Unit (10 options), Net Price, Price Code, Discount %, Discount Code -->
+            <div class="grid grid-cols-5 gap-1.5 items-center">
+              <div>
+                <label class="block text-[9px] font-bold uppercase text-slate-400 mb-0.5">Unit</label>
+                <select onchange="updateRowField('${row.id}', 'unit', this.value)" class="w-full min-h-[38px] px-1.5 py-1 text-[11px] font-bold bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#1E3A5F]">
+                  ${unitOptions}
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-[9px] font-bold uppercase text-slate-400 mb-0.5">Net Price</label>
+                <input
+                  type="text"
+                  inputmode="decimal"
+                  value="${escapeHtml(row.price || '')}"
+                  placeholder="132.09"
+                  oninput="updateRowField('${row.id}', 'price', this.value)"
+                  onkeydown="handleRowEnterKey(event, ${realIdx})"
+                  class="w-full min-h-[38px] px-2 py-1 text-xs font-mono text-center bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#1E3A5F]"
+                />
+              </div>
+
+              <div>
+                <label class="block text-[9px] font-bold uppercase text-amber-800 mb-0.5">Price Code</label>
+                <input
+                  id="code-${row.id}"
+                  type="text"
+                  value="${escapeHtml(row.code || '')}"
+                  placeholder="BCYY"
+                  oninput="updateRowField('${row.id}', 'code', this.value.toUpperCase())"
+                  onkeydown="handleRowEnterKey(event, ${realIdx})"
+                  class="w-full min-h-[38px] px-1.5 py-1 text-xs font-mono font-bold uppercase text-center bg-amber-50 border border-slate-300 rounded-lg focus:outline-none focus:border-[#1E3A5F]"
+                />
+              </div>
+
+              <div>
+                <label class="block text-[9px] font-bold uppercase text-slate-400 mb-0.5">Discount</label>
+                <input
+                  type="text"
+                  value="${escapeHtml(row.discRaw || '')}"
+                  placeholder="10%"
+                  oninput="updateRowField('${row.id}', 'discRaw', this.value)"
+                  onkeydown="handleRowEnterKey(event, ${realIdx})"
+                  class="w-full min-h-[38px] px-1.5 py-1 text-xs font-mono text-center bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-[#1E3A5F]"
+                />
+              </div>
+
+              <div>
+                <label class="block text-[9px] font-bold uppercase text-emerald-800 mb-0.5">Disc. Code</label>
+                <input
+                  id="disccode-${row.id}"
+                  type="text"
+                  value="${escapeHtml(row.discCode || '')}"
+                  placeholder="CX%"
+                  oninput="updateRowField('${row.id}', 'discCode', this.value.toUpperCase())"
+                  onkeydown="handleRowEnterKey(event, ${realIdx})"
+                  class="w-full min-h-[38px] px-1.5 py-1 text-xs font-mono font-bold uppercase text-center bg-emerald-50 border border-slate-300 rounded-lg focus:outline-none focus:border-[#1E3A5F]"
+                />
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = rowsHtml;
+    }
+
+    // =========================================================================
+    // 12. PRINTABLE SHEET HTML BUILDER (WITH TOP-RIGHT CASH + CX% / CREDIT + CK%)
+    // =========================================================================
+    function formatHeaderLabel(text, stackTwoWords = false) {
+      const clean = escapeHtml((text || '').trim().toUpperCase());
+      if (!clean) return '&nbsp;';
+      if (stackTwoWords && clean === 'NET PRICE') return 'NET<br/>PRICE';
+      if (stackTwoWords && clean === 'ITEM DESCRIPTION') return 'ITEM<br/>DESCRIPTION';
+      return clean;
+    }
+
+    function buildEditableAttrs(editable, field, rowId = '') {
+      if (!editable || !isAdmin()) return '';
+      const rowAttr = rowId ? ` data-row-id="${escapeHtml(rowId)}"` : '';
+      return ` contenteditable="true" spellcheck="false" data-editable="${field}"${rowAttr} onblur="handleDirectPreviewBlur(this)" onkeydown="handleDirectPreviewKeydown(event, this)"`;
+    }
+
+    function buildSheetInnerHtml(editable = false) {
+      const basePx = Number(sheet.fontSize) || 15;
+      const supNameSize = (basePx + 2) + 'px';
+      const supSubSize = Math.max(10, basePx - 4) + 'px';
+      const titleSize = (basePx + 1) + 'px';
+      const subtitleSize = Math.max(10, basePx - 3) + 'px';
+
+      const supName = (sheet.supplierName || '').trim();
+      const supSub = (sheet.supplierSub || '').trim();
+      const showSupplier = sheet.showSupplier !== false && (supName || supSub || editable);
+
+      const supplierHtml = showSupplier ? `
+        <div class="ecco-sheet-banner text-center">
+          <div${buildEditableAttrs(editable, 'supplierName')} class="font-bold uppercase tracking-wide leading-tight" style="font-size: ${supNameSize};">
+            ${escapeHtml(supName || 'SUPPLIER COMPANY NAME')}
+          </div>
+          ${(supSub || editable) ? `
+            <div${buildEditableAttrs(editable, 'supplierSub')} class="uppercase tracking-normal leading-snug mt-0.5 opacity-95" style="font-size: ${supSubSize};">
+              ${escapeHtml(supSub || (editable ? 'DEALER PRICE & CIPHER LIST' : ''))}
+            </div>
+          ` : ''}
+        </div>
+      ` : '';
+
+      const titleText = (sheet.title || '').trim() || 'PRICE/CODE LIST';
+      const subText = (sheet.subtitle || '').trim();
+      const showMarkup = sheet.showMarkupGuide !== false;
+      const cashLabel = (sheet.cashMarkupLabel || 'CASH + CX%').trim();
+      const creditLabel = (sheet.creditMarkupLabel || 'CREDIT + CK%').trim();
+
+      // Header Row with Centered Title & Top-Right CASH + CX% / CREDIT + CK% Box
+      const headerHtml = `
+        <div class="flex items-start justify-between gap-3 mb-3.5">
+          ${showMarkup ? `<div class="hidden sm:block w-[135px] shrink-0"></div>` : ''}
+          <div class="flex-1 text-center">
+            <h1${buildEditableAttrs(editable, 'title')} class="font-bold uppercase tracking-tight leading-snug" style="font-size: ${titleSize};">
+              ${escapeHtml(titleText)}
+            </h1>
+            ${(subText || editable) ? `
+              <div${buildEditableAttrs(editable, 'subtitle')} class="uppercase leading-snug mt-0.5" style="font-size: ${subtitleSize};">
+                ${escapeHtml(subText || (editable ? 'AS OF DATE' : ''))}
+              </div>
+            ` : ''}
+          </div>
+          ${showMarkup ? `
+            <div class="markup-guide-box px-2.5 py-1.5 text-left shrink-0 leading-tight" style="font-size: ${Math.max(10, basePx - 4)}px;">
+              <div${buildEditableAttrs(editable, 'cashMarkupLabel')} class="font-bold uppercase whitespace-nowrap">${escapeHtml(cashLabel)}</div>
+              <div${buildEditableAttrs(editable, 'creditMarkupLabel')} class="font-bold uppercase whitespace-nowrap mt-0.5">${escapeHtml(creditLabel)}</div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+
+      const showRawPrice = (sheet.priceDisplay || 'both') === 'both';
+      const showUnit = sheet.showUnitCol !== false;
+      const isDual = (sheet.layoutMode || 'single') === 'dual';
+
+      const h1 = formatHeaderLabel(sheet.col1Header || 'ITEM DESCRIPTION', isDual);
+      const hUnit = formatHeaderLabel(sheet.colUnitHeader || 'UNIT', false);
+      const h2 = formatHeaderLabel(sheet.col2Header || 'NET PRICE', isDual);
+      const h3 = formatHeaderLabel(sheet.col3Header || 'CODE', false);
+      const h4 = formatHeaderLabel(sheet.col4Header || 'DISCOUNT', false);
+
+      const cellPad = isDual
+        ? (basePx <= 13 ? '3px 3px' : '3px 4px')
+        : (basePx <= 13 ? '4px 6px' : basePx >= 17 ? '6px 9px' : '5px 7px');
+
+      const renderDescWithHike = (r) => {
+        const text = escapeHtml(r.desc || '');
+        if (!text) return '&nbsp;';
+        return r.hiked ? `&#9650; ${text}` : text;
+      };
+
+      let tableHtml = '';
+
+      if (!isDual) {
+        // FULL WIDTH SINGLE TABLE
+        const colsCount = 3 + (showUnit ? 1 : 0) + (showRawPrice ? 1 : 0);
+        let colGroup = '';
+        if (showUnit && showRawPrice) {
+          colGroup = `<col style="width: 40%;" /><col style="width: 11%;" /><col style="width: 16%;" /><col style="width: 17%;" /><col style="width: 16%;" />`;
+        } else if (showUnit && !showRawPrice) {
+          colGroup = `<col style="width: 48%;" /><col style="width: 14%;" /><col style="width: 19%;" /><col style="width: 19%;" />`;
+        } else if (!showUnit && showRawPrice) {
+          colGroup = `<col style="width: 44%;" /><col style="width: 18%;" /><col style="width: 19%;" /><col style="width: 19%;" />`;
+        } else {
+          colGroup = `<col style="width: 52%;" /><col style="width: 24%;" /><col style="width: 24%;" />`;
+        }
+
+        const bodyHtml = sheet.rows.map(r => {
+          if (r.isDivider) {
+            return `
+              <tr class="section-divider-row">
+                <td colspan="${colsCount}"${buildEditableAttrs(editable, 'desc', r.id)} style="padding: ${cellPad};">${escapeHtml(r.desc || 'SECTION')}</td>
+              </tr>
+            `;
+          }
+          return `
+            <tr>
+              <td${buildEditableAttrs(editable, 'desc', r.id)} style="padding: ${cellPad};">${renderDescWithHike(r)}</td>
+              ${showUnit ? `<td${buildEditableAttrs(editable, 'unit', r.id)} style="padding: ${cellPad};">${escapeHtml(r.unit || 'PC')}</td>` : ''}
+              ${showRawPrice ? `<td${buildEditableAttrs(editable, 'price', r.id)} style="padding: ${cellPad};">${escapeHtml(r.price || '') || '&nbsp;'}</td>` : ''}
+              <td${buildEditableAttrs(editable, 'code', r.id)} style="padding: ${cellPad}; font-weight: bold;">${escapeHtml(r.code || '') || '&nbsp;'}</td>
+              <td${buildEditableAttrs(editable, 'discCode', r.id)} style="padding: ${cellPad};">${escapeHtml(r.discCode || '') || '&nbsp;'}</td>
+            </tr>
+          `;
+        }).join('');
+
+        tableHtml = `
+          <table class="word-table" style="font-size: ${basePx}px;">
+            <colgroup>${colGroup}</colgroup>
+            <thead>
+              <tr>
+                <th style="padding: ${cellPad};">${h1}</th>
+                ${showUnit ? `<th style="padding: ${cellPad};">${hUnit}</th>` : ''}
+                ${showRawPrice ? `<th style="padding: ${cellPad};">${h2}</th>` : ''}
+                <th style="padding: ${cellPad};">${h3}</th>
+                <th style="padding: ${cellPad};">${h4}</th>
+              </tr>
+            </thead>
+            <tbody>${bodyHtml}</tbody>
+          </table>
+        `;
+      } else {
+        // DUAL SPLIT TABLE
+        const half = Math.ceil(sheet.rows.length / 2);
+        const pairs = [];
+        for (let i = 0; i < half; i++) {
+          pairs.push({ left: sheet.rows[i] || null, right: sheet.rows[i + half] || null });
+        }
+
+        const dualFontSize = Math.max(10, basePx - 3);
+        const renderHalfCells = (item) => {
+          if (!item) {
+            return `
+              <td style="padding: ${cellPad};">&nbsp;</td>
+              ${showUnit ? `<td style="padding: ${cellPad};">&nbsp;</td>` : ''}
+              ${showRawPrice ? `<td style="padding: ${cellPad};">&nbsp;</td>` : ''}
+              <td style="padding: ${cellPad};">&nbsp;</td>
+              <td style="padding: ${cellPad};">&nbsp;</td>
+            `;
+          }
+          if (item.isDivider) {
+            const span = 3 + (showUnit ? 1 : 0) + (showRawPrice ? 1 : 0);
+            return `<td colspan="${span}" style="padding: ${cellPad}; font-weight: bold;">${escapeHtml(item.desc || '')}</td>`;
+          }
+          return `
+            <td${buildEditableAttrs(editable, 'desc', item.id)} style="padding: ${cellPad};">${renderDescWithHike(item)}</td>
+            ${showUnit ? `<td${buildEditableAttrs(editable, 'unit', item.id)} style="padding: ${cellPad};">${escapeHtml(item.unit || 'PC')}</td>` : ''}
+            ${showRawPrice ? `<td${buildEditableAttrs(editable, 'price', item.id)} style="padding: ${cellPad};">${escapeHtml(item.price || '') || '&nbsp;'}</td>` : ''}
+            <td${buildEditableAttrs(editable, 'code', item.id)} style="padding: ${cellPad}; font-weight: bold;">${escapeHtml(item.code || '') || '&nbsp;'}</td>
+            <td${buildEditableAttrs(editable, 'discCode', item.id)} style="padding: ${cellPad};">${escapeHtml(item.discCode || '') || '&nbsp;'}</td>
+          `;
+        };
+
+        const bodyHtml = pairs.map(({ left, right }) => `<tr>${renderHalfCells(left)}${renderHalfCells(right)}</tr>`).join('');
+        const halfHead = `
+          <th style="padding: ${cellPad};">${h1}</th>
+          ${showUnit ? `<th style="padding: ${cellPad};">${hUnit}</th>` : ''}
+          ${showRawPrice ? `<th style="padding: ${cellPad};">${h2}</th>` : ''}
+          <th style="padding: ${cellPad};">${h3}</th>
+          <th style="padding: ${cellPad};">${h4}</th>
+        `;
+
+        tableHtml = `
+          <table class="word-table" style="font-size: ${dualFontSize}px;">
+            <thead><tr>${halfHead}${halfHead}</tr></thead>
+            <tbody>${bodyHtml}</tbody>
+          </table>
+        `;
+      }
+
+      const footerHtml = `
+        <div class="flex items-center justify-between uppercase mt-3 pt-1.5 border-t border-black/20" style="font-size: 9px; color: #333;">
+          <span>ECCO HARDWARE PRICING SYSTEM</span>
+          <span>${escapeHtml(titleText)}</span>
+        </div>
+      `;
+
+      return supplierHtml + headerHtml + tableHtml + footerHtml;
+    }
+
+    function applySheetThemeClass(el) {
+      if (!el) return;
+      el.classList.remove('sheet-theme-ecco', 'sheet-theme-classic');
+      el.classList.add(currentTheme === 'ecco' ? 'sheet-theme-ecco' : 'sheet-theme-classic');
+    }
+
+    function applyPaperSizeClass(el) {
+      if (!el) return;
+      el.classList.remove('paper-a4', 'paper-letter', 'paper-long');
+      if (sheet.paperSize === 'letter') el.classList.add('paper-letter');
+      else if (sheet.paperSize === 'long') el.classList.add('paper-long');
+      else el.classList.add('paper-a4');
+    }
+
+    function renderPreview() {
+      const paper = document.getElementById('paper-container');
+      if (!paper) return;
+      applyPaperSizeClass(paper);
+      applySheetThemeClass(paper);
+      paper.innerHTML = buildSheetInnerHtml(false);
+    }
+
+    function renderModalSheet() {
+      const modalPaper = document.getElementById('modal-paper-container');
+      if (!modalPaper) return;
+      applyPaperSizeClass(modalPaper);
+      applySheetThemeClass(modalPaper);
+      modalPaper.innerHTML = buildSheetInnerHtml(isModalEditMode);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // =========================================================================
+    // INITIALIZE ON LOAD
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      checkSharedUrlHash();
+      applyThemeStyles();
+      renderSavedSheetsDropdown();
+      syncInputsFromState();
+      syncControlButtons();
+      renderRowsEditor();
+      renderPreview();
+      checkExistingSession();
+    });
+
+    window.addEventListener('resize', () => {
+      if (isModalOpen) {
+        applyModalScale();
+      }
+    });
+  </script>
+</body>
+</html>
