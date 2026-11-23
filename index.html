@@ -224,7 +224,7 @@
   <input type="file" id="json-import-input" accept=".json,application/json" class="hidden" onchange="handleImportBackupFile(event)" />
 
   <!-- ======================================================================= -->
-  <!-- 1. ECCO STAFF & ADMIN LOGIN GATE (sessionStorage + SHA-256)             -->
+  <!-- 1. ECCO STAFF & ADMIN LOGIN GATE (In-Memory + sessionStorage)           -->
   <!-- ======================================================================= -->
   <div id="login-gate-overlay" class="no-print fixed inset-0 z-[100] bg-gradient-to-br from-[#0f1f33] via-[#1E3A5F] to-[#142842] flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-sky-200/30">
@@ -237,8 +237,8 @@
         <p class="text-xs text-sky-200/85 mt-1">Authorized Staff &amp; Admin Access Only</p>
       </div>
 
-      <!-- Login Form -->
-      <form onsubmit="handleLoginSubmit(event)" class="p-6 sm:p-7 space-y-4">
+      <!-- Login Form (Prevent any native reload on file:// or HTTP) -->
+      <form onsubmit="event.preventDefault(); handleLogin(); return false;" class="p-6 sm:p-7 space-y-4">
         <div id="login-error-box" class="hidden bg-rose-50 border border-rose-200 text-rose-700 px-3.5 py-2.5 rounded-xl text-xs font-semibold">
           Invalid username or password. Please try again.
         </div>
@@ -249,8 +249,8 @@
             type="text"
             id="login-username"
             autocomplete="username"
-            required
             placeholder="Enter username"
+            onkeydown="if(event.key==='Enter'){event.preventDefault(); handleLogin();}"
             class="w-full min-h-[46px] px-3.5 py-2.5 text-sm font-medium bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:border-[#1E3A5F]"
           />
         </div>
@@ -262,17 +262,17 @@
               type="password"
               id="login-password"
               autocomplete="current-password"
-              required
               placeholder="Enter password"
-              class="w-full min-h-[46px] pl-3.5 pr-12 py-2.5 text-sm font-medium bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:border-[#1E3A5F]"
+              onkeydown="if(event.key==='Enter'){event.preventDefault(); handleLogin();}"
+              class="w-full min-h-[46px] pl-3.5 pr-16 py-2.5 text-sm font-medium bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:border-[#1E3A5F]"
             />
-            <button type="button" onclick="toggleLoginPasswordVisibility()" class="absolute right-2.5 px-2 py-1 text-[11px] font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
+            <button type="button" id="toggle-pass-btn" onclick="toggleLoginPasswordVisibility()" class="absolute right-2.5 px-2 py-1 text-[11px] font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
               Show
             </button>
           </div>
         </div>
 
-        <button type="submit" class="w-full min-h-[48px] py-3 px-4 rounded-xl bg-[#1E3A5F] hover:bg-[#142842] active:scale-[0.99] text-white font-bold text-sm shadow-md transition cursor-pointer">
+        <button type="button" onclick="handleLogin()" class="w-full min-h-[48px] py-3 px-4 rounded-xl bg-[#1E3A5F] hover:bg-[#142842] active:scale-[0.99] text-white font-bold text-sm shadow-md transition cursor-pointer">
           Sign In to Price List
         </button>
 
@@ -869,8 +869,8 @@
             <!-- Admin Login Credentials Manager -->
             <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-2.5">
               <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold uppercase text-[#1E3A5F]">Staff &amp; Admin Login Credentials</span>
-                <button type="button" onclick="resetCredentialsToConfig()" class="text-[10px] font-bold text-slate-500 hover:text-rose-600 cursor-pointer">Reset Default</button>
+                <span class="text-[11px] font-bold uppercase text-[#1E3A5F]">Change Admin &amp; Sales Login</span>
+                <button type="button" onclick="resetCredentialsToConfig()" class="text-[10px] font-bold text-slate-500 hover:text-rose-600 cursor-pointer">Reset to Default</button>
               </div>
               <div class="grid grid-cols-2 gap-2">
                 <div>
@@ -891,7 +891,7 @@
                 </div>
               </div>
               <button type="button" onclick="saveUpdatedCredentials()" class="w-full min-h-[38px] py-1.5 px-3 rounded-xl text-xs font-bold text-white bg-[#1E3A5F] hover:bg-[#142842] transition cursor-pointer">
-                Update Login Credentials
+                Save Custom Credentials
               </button>
             </div>
           </div>
@@ -986,25 +986,183 @@
   <script>
     // =========================================================================
     // 1. EDIT YOUR USERNAMES & PASSWORDS RIGHT HERE (WORKS ON FILE:// & HTTPS)
-    // Change the values below and save the file, OR edit them inside the app's
-    // "Supplier Header, Markup Guide & Layout" panel when logged in as Admin.
     // =========================================================================
     const AUTH_CONFIG = {
-      adminUsername: 'admin',
-      adminPassword: 'ecco2026',
-      salesUsername: 'sales',
-      salesPassword: 'counter2026'
+      adminUsername: "admin",
+      adminPassword: "ecco2026",
+      salesUsername: "sales",
+      salesPassword: "counter2026"
     };
 
-    const STORAGE_KEY_CREDS = 'ecco_auth_credentials_v1';
+    const STORAGE_KEY_CREDS = 'ecco_custom_auth';
     const SESSION_AUTH_KEY = 'ecco_session_auth_v1';
+    window.__ECCO_ROLE = null;
     let currentUser = null; // { username, role: 'admin' | 'sales' }
 
-    // Pure-JavaScript SHA-256 (works 100% offline on file:/// Desktop, localhost & HTTPS)
-    function sha256Hex(ascii) {
-      function rightRotate(value, amount) {
-        return (value >>> amount) | (value << (32 - amount));
+    function getActiveCredentials() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_CREDS);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.adminUsername && parsed.adminPassword && parsed.salesUsername && parsed.salesPassword) {
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      return { ...AUTH_CONFIG };
+    }
+
+    function syncCredentialInputs() {
+      const creds = getActiveCredentials();
+      const au = document.getElementById('cred-admin-user');
+      const ap = document.getElementById('cred-admin-pass');
+      const su = document.getElementById('cred-sales-user');
+      const sp = document.getElementById('cred-sales-pass');
+      if (au) au.value = creds.adminUsername;
+      if (ap) ap.value = creds.adminPassword;
+      if (su) su.value = creds.salesUsername;
+      if (sp) sp.value = creds.salesPassword;
+    }
+
+    function saveUpdatedCredentials() {
+      if (!isAdmin()) return;
+      const adminUsername = document.getElementById('cred-admin-user').value.trim();
+      const adminPassword = document.getElementById('cred-admin-pass').value;
+      const salesUsername = document.getElementById('cred-sales-user').value.trim();
+      const salesPassword = document.getElementById('cred-sales-pass').value;
+
+      if (!adminUsername || !adminPassword || !salesUsername || !salesPassword) {
+        showToast('All username and password fields are required');
+        return;
       }
+      if (adminUsername.toLowerCase() === salesUsername.toLowerCase()) {
+        showToast('Admin and Sales usernames must be different');
+        return;
+      }
+
+      try {
+        localStorage.setItem(STORAGE_KEY_CREDS, JSON.stringify({
+          adminUsername,
+          adminPassword,
+          salesUsername,
+          salesPassword
+        }));
+      } catch (e) {}
+      showToast('Custom login credentials saved!');
+    }
+
+    function resetCredentialsToConfig() {
+      if (!isAdmin()) return;
+      try { localStorage.removeItem(STORAGE_KEY_CREDS); } catch (e) {}
+      syncCredentialInputs();
+      showToast('Reset credentials to default AUTH_CONFIG');
+    }
+
+    function checkExistingSession() {
+      if (window.__ECCO_ROLE && currentUser) {
+        unlockAppUI();
+        return;
+      }
+      try {
+        const raw = sessionStorage.getItem(SESSION_AUTH_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.username && parsed.role) {
+            currentUser = parsed;
+            window.__ECCO_ROLE = parsed.role;
+            unlockAppUI();
+            return;
+          }
+        }
+      } catch (e) {}
+      lockAppUI();
+    }
+
+    function lockAppUI() {
+      currentUser = null;
+      window.__ECCO_ROLE = null;
+      const gate = document.getElementById('login-gate-overlay');
+      if (gate) {
+        gate.classList.remove('hidden');
+        gate.classList.add('flex');
+      }
+      const passInp = document.getElementById('login-password');
+      if (passInp) passInp.value = '';
+    }
+
+    function unlockAppUI() {
+      const gate = document.getElementById('login-gate-overlay');
+      if (gate) {
+        gate.classList.add('hidden');
+        gate.classList.remove('flex');
+      }
+      applyRolePermissions();
+      syncCredentialInputs();
+      renderRowsEditor();
+      renderPreview();
+    }
+
+    function handleLogin() {
+      const userInp = document.getElementById('login-username');
+      const passInp = document.getElementById('login-password');
+      const errorBox = document.getElementById('login-error-box');
+
+      const userVal = (userInp ? userInp.value : '').trim().toLowerCase();
+      const passVal = passInp ? passInp.value : '';
+
+      const creds = getActiveCredentials();
+      let matchedRole = null;
+      let matchedName = '';
+
+      if (userVal === creds.adminUsername.trim().toLowerCase() && passVal === creds.adminPassword) {
+        matchedRole = 'admin';
+        matchedName = creds.adminUsername.trim();
+      } else if (userVal === creds.salesUsername.trim().toLowerCase() && passVal === creds.salesPassword) {
+        matchedRole = 'sales';
+        matchedName = creds.salesUsername.trim();
+      }
+
+      if (!matchedRole) {
+        if (errorBox) errorBox.classList.remove('hidden');
+        return false;
+      }
+
+      if (errorBox) errorBox.classList.add('hidden');
+      window.__ECCO_ROLE = matchedRole;
+      currentUser = { username: matchedName, role: matchedRole };
+
+      try {
+        sessionStorage.setItem(SESSION_AUTH_KEY, JSON.stringify(currentUser));
+      } catch (err) {}
+
+      unlockAppUI();
+      showToast(`Signed in as ${matchedName.toUpperCase()} (${matchedRole.toUpperCase()})`);
+      return false;
+    }
+
+    function handleLogout() {
+      window.__ECCO_ROLE = null;
+      currentUser = null;
+      try {
+        sessionStorage.removeItem(SESSION_AUTH_KEY);
+      } catch (e) {}
+      if (isModalOpen) closeFullscreenPreview();
+      lockAppUI();
+      showToast('Logged out — session locked');
+    }
+
+    function toggleLoginPasswordVisibility() {
+      const inp = document.getElementById('login-password');
+      const btn = document.getElementById('toggle-pass-btn');
+      if (!inp) return;
+      const showing = inp.type === 'text';
+      inp.type = showing ? 'password' : 'text';
+      if (btn) btn.textContent = showing ? 'Show' : 'Hide';
+    }
+
+    function isAdmin() {
+      return window.__ECCO_ROLE === 'admin' || (currentUser && currentUser.role === 'admin');
+    }
       const mathPow = Math.pow;
       const maxWord = mathPow(2, 32);
       let result = '';
@@ -1467,9 +1625,9 @@
       id: 'sample-ecco-paints-wires',
       department: 'PAINTS',
       showSupplier: true,
-      supplierName: 'PACIFIC PAINT & INDUSTRIAL SUPPLY',
+      supplierName: 'DAVIES / BOYSEN PAINTS & INDUSTRIAL SUPPLY',
       supplierSub: 'DEALER WHOLESALE PRICE & CIPHER CODE LIST',
-      title: 'PAINTS, THINNERS, WIRES & HOSES',
+      title: 'DAVIES / BOYSEN PAINTS & THINNERS',
       subtitle: 'AS OF NOVEMBER 2026',
       showMarkupGuide: true,
       cashMarkupLabel: 'CASH + CX%',
@@ -1490,8 +1648,8 @@
       col4Header: 'DISCOUNT',
       rows: [
         { id: 's1', isDivider: true, desc: '--- PAINTS & THINNERS ---', unit: 'GAL', price: '', code: '', discRaw: '', discCode: '', hiked: false },
-        { id: 'r1', isDivider: false, desc: 'QUICK DRY ENAMEL WHITE', unit: 'GAL', price: '645.20', code: 'BHUK', discRaw: '10%', discCode: 'CX%', hiked: false },
-        { id: 'r2', isDivider: false, desc: 'QUICK DRY ENAMEL WHITE', unit: 'QT', price: '182.50', code: 'ECAY', discRaw: '10%', discCode: 'CX%', hiked: false },
+        { id: 'r1', isDivider: false, desc: 'BOYSEN QUICK DRY ENAMEL WHITE', unit: 'GAL', price: '645.20', code: 'BHUK', discRaw: '10%', discCode: 'CX%', hiked: false },
+        { id: 'r2', isDivider: false, desc: 'DAVIES SUN & RAIN ELASTOMERIC WHITE', unit: 'QT', price: '182.50', code: 'ECAY', discRaw: '10%', discCode: 'CX%', hiked: false },
         { id: 'r3', isDivider: false, desc: 'LACQUER THINNER PURE', unit: 'LTR', price: '132.09', code: 'BCYY', discRaw: '5%', discCode: 'K%', hiked: true },
         { id: 'r4', isDivider: false, desc: 'LACQUER THINNER (20L PAIL)', unit: 'PAIL', price: '2240', code: 'ROOUX', discRaw: '10/5', discCode: 'CX/K', hiked: false },
         { id: 's2', isDivider: true, desc: '--- WIRES, FITTINGS & CHEMICAL HOSE ---', unit: 'ROLL', price: '', code: '', discRaw: '', discCode: '', hiked: false },
